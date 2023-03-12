@@ -1,0 +1,21 @@
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/this_you_model.accesswidener")
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    api "org.joml:joml:1.10.5"
+    // Remove the next line if you don't want to depend on the API
+    // api "com.github.LlamaLad7:MixinExtras:0.1.1"
+    // modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+}

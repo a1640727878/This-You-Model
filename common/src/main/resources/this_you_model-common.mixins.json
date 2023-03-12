@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8.5",
+  "package": "sky_bai.mod.tym.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MixinEntityRenderers"
+  ],
+  "mixins": [
+    "MixinMatrix4f"
+  ]
+}

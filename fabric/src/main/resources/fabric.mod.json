@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "this_you_model_fabric",
+  "version": "${version}",
+  "name": "This You Model",
+  "description": "This is an set you model mod",
+  "authors": [
+    "sky_bai"
+  ],
+  "license": "Insert License Here",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "sky_bai.mod.tym.fabric.ThisYouModel_Fabric",
+      "sky_bai.mod.tym.fabric.lib.MCglTF_Fabric"
+    ]
+  },
+  "mixins": [
+    "this_you_model.mixins.json",
+    "this_you_model-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.18.2"
+  }
+}

@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
+
+[[mods]]
+modId = "this_you_model"
+version = "${version}"
+displayName = "This You Model"
+authors = "sky_bai"
+description = '''
+This is an set you model mod
+'''
+#logoFile = ""
+
+[[dependencies.this_you_model]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.this_you_model]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "BOTH"
