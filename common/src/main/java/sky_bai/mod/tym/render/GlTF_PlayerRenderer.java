@@ -188,8 +188,8 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         if (player.isSpectator()) return;
 
         float time = (player.level.getGameTime() + partialTicks) / 20;
-        //Play every animation clips simultaneously
-        for (List<InterpolatedChannel> animation : getData(player).getAnimations().values()) {
+        // 播放动画
+        for (List<InterpolatedChannel> animation : getData(player).getAnimations(player, partialTicks).values()) {
             animation.parallelStream().forEach((channel) -> {
                 float[] keys = channel.getKeys();
                 channel.update(time % keys[keys.length - 1]);

@@ -1,6 +1,7 @@
 package sky_bai.mod.tym.manager;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +14,7 @@ import sky_bai.mod.lib.mcgltf.RenderedGltfModel;
 import sky_bai.mod.lib.mcgltf.RenderedGltfScene;
 import sky_bai.mod.lib.mcgltf.animation.GltfAnimationCreator;
 import sky_bai.mod.lib.mcgltf.animation.InterpolatedChannel;
+import sky_bai.mod.tym.api.PlayerState;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,7 +140,7 @@ public class GlTFModelManager {
 
         protected RenderedGltfScene renderedScene;
 
-        protected LinkedHashMap<String, List<InterpolatedChannel>> animations;
+        protected Map<String, List<InterpolatedChannel>> animations;
 
         protected Map<String, NodeModel> coreNode;
 
@@ -152,13 +154,12 @@ public class GlTFModelManager {
             renderedScene = renderedModel.renderedGltfScenes.get(0);
             renderedScene.setShader(SHADER);
             List<AnimationModel> animationModels = renderedModel.gltfModel.getAnimationModels();
-            animations = new LinkedHashMap<>(animationModels.size());
+            animations = new HashMap<>(animationModels.size());
             for (AnimationModel model : animationModels) {
                 animations.put(model.getName(), GltfAnimationCreator.createGltfAnimation(model));
             }
 
             GltfModel model = renderedModel.gltfModel;
-
 
             List<NodeModel> nodes = model.getNodeModels();
             coreNode = new HashMap<>();
@@ -166,9 +167,7 @@ public class GlTFModelManager {
                 String name = node.getName();
                 if (name == null) continue;
                 switch (name) {
-                    case "Body_ALL", "Head", "LeftHandLocator", "RightHandLocator" -> {
-                        coreNode.put(name, node);
-                    }
+                    case "Body_ALL", "Head", "LeftHandLocator", "RightHandLocator" -> coreNode.put(name, node);
                 }
             }
         }
@@ -181,8 +180,31 @@ public class GlTFModelManager {
             return renderedScene;
         }
 
-        public LinkedHashMap<String, List<InterpolatedChannel>> getAnimations() {
+        public Map<String, List<InterpolatedChannel>> getAnimations() {
             return animations;
+        }
+
+        public Map<String, List<InterpolatedChannel>> getAnimations(AbstractClientPlayer player, float partialTick) {
+            LinkedHashMap<String, List<InterpolatedChannel>> map = new LinkedHashMap<>();
+            PlayerState state = AnimationsManager.getManager().refreshPlayerState(player, partialTick);
+            String[] main_name = state.getMainAnimName();
+            setAnimationsMap(main_name, map);
+            return map;
+        }
+
+        public void setAnimationsMap(String[] names, LinkedHashMap<String, List<InterpolatedChannel>> map) {
+            String name_tow = null;
+            boolean is = false;
+            for (Map.Entry<String, List<InterpolatedChannel>> entry : animations.entrySet()) {
+                String name = entry.getKey();
+                if (names.length > 1 && name.equals(names[1])) is = true;
+                if (!name.equals(names[0])) continue;
+                name_tow = names[0];
+                break;
+            }
+            if (name_tow == null) name_tow = is ? names[1] : PlayerState.IDLE;
+            List<InterpolatedChannel> list = new ArrayList<>(animations.get(name_tow));
+            map.put(name_tow, list);
         }
 
         public Map<String, NodeModel> getCoreNode() {
