@@ -203,7 +203,9 @@ public class GlTFModelManager {
                 break;
             }
             if (name_tow == null) name_tow = is ? names[1] : PlayerState.IDLE;
-            List<InterpolatedChannel> list = new ArrayList<>(animations.get(name_tow));
+            List<InterpolatedChannel> v = animations.get(name_tow);
+            List<InterpolatedChannel> list = new ArrayList<>();
+            if (v != null) list.addAll(v);
             map.put(name_tow, list);
         }
 

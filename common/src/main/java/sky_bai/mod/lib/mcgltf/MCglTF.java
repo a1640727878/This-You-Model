@@ -185,7 +185,15 @@ public abstract class MCglTF {
 
     private void processRenderedGltfModels(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, BiFunction<List<Runnable>, GltfModel, RenderedGltfModel> renderedGltfModelBuilder) {
         lookup.forEach((modelLocation, receivers) -> {
-            Iterator<GlTFModelManager.ModelData> iterator = receivers.getRight().iterator();
+            List<GlTFModelManager.ModelData> list = receivers.getRight();
+            for (GlTFModelManager.ModelData data : list) {
+                if (data.getData().isReceiveSharedModel(receivers.getLeft(),gltfRenderData)){
+                    RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
+                    data.getData().onReceiveSharedModel(renderedModel);
+                }
+            }
+
+            /**Iterator<GlTFModelManager.ModelData> iterator = receivers.getRight().iterator();
             do {
                 GlTFModelManager.ModelData receiver = iterator.next();
                 if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
@@ -199,7 +207,7 @@ public abstract class MCglTF {
                     }
                     return;
                 }
-            } while (iterator.hasNext());
+            } while (iterator.hasNext());*/
         });
     }
 
