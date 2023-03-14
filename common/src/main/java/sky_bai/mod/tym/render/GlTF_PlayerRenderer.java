@@ -22,14 +22,12 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
-import sky_bai.mod.lib.jgltf.model.NodeModel;
-import sky_bai.mod.lib.mcgltf.MCglTF;
-import sky_bai.mod.lib.mcgltf.RenderedGltfModel;
-import sky_bai.mod.lib.mcgltf.animation.InterpolatedChannel;
+import sky_bai.mod.tym.lib.jgltf.model.NodeModel;
+import sky_bai.mod.tym.lib.mcgltf.MCglTF;
+import sky_bai.mod.tym.lib.mcgltf.RenderedGltfModel;
 import sky_bai.mod.tym.manager.GlTFModelManager;
 import sky_bai.mod.tym.manager.PlayerModelManager;
 
-import java.util.List;
 import java.util.Map;
 
 public class GlTF_PlayerRenderer extends PlayerRenderer {
@@ -59,6 +57,7 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
             render_item(player, entityYaw, partialTicks, matrixStack, buffer, packedLight, netHeadPitch, netHeadYaw);
             if (this.shouldShowName(player))
                 renderNameTag(player, player.getDisplayName(), matrixStack, buffer, packedLight);
+            getData(player).resetNode();
         } else {
             super.render(player, entityYaw, partialTicks, matrixStack, buffer, packedLight);
         }
@@ -68,12 +67,8 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         is_open = b;
     }
 
-    public String getModelName(AbstractClientPlayer entity) {
-        return PlayerModelManager.getManager().get(entity);
-    }
-
     public GlTFModelManager.RendererData getData(AbstractClientPlayer entity) {
-        return GlTFModelManager.getManager().getRendererData(getModelName(entity));
+        return PlayerModelManager.getManager().get(entity).getData();
     }
 
     private Matrix4f getMatrix4f(NodeModel node) {
@@ -190,13 +185,11 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         if (player.isSpectator()) return;
 
         float time = (player.level.getGameTime() + partialTicks) / 20;
-        // 播放动画
-        for (List<InterpolatedChannel> animation : getData(player).getAnimations(player, partialTicks).values()) {
-            animation.parallelStream().forEach((channel) -> {
-                float[] keys = channel.getKeys();
-                channel.update(time % keys[keys.length - 1]);
-            });
-        }
+        // 播放主线动画
+        getData(player).getMainAnimation(player, partialTicks).forEach((channel) -> {
+            float[] keys = channel.getKeys();
+            channel.update(time % keys[keys.length - 1]);
+        });
 
         // 头上下
         float head_pitch = netHeadPitch * (float) (Math.PI / 180);

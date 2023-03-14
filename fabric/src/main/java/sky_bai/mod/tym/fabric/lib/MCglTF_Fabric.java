@@ -12,9 +12,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
-import sky_bai.mod.lib.jgltf.model.GltfModel;
-import sky_bai.mod.lib.jgltf.model.io.Buffers;
-import sky_bai.mod.lib.mcgltf.MCglTF;
+import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
+import sky_bai.mod.tym.lib.jgltf.model.io.Buffers;
+import sky_bai.mod.tym.lib.mcgltf.MCglTF;
 import sky_bai.mod.tym.ThisYouModel_Main;
 import sky_bai.mod.tym.manager.GlTFModelManager;
 

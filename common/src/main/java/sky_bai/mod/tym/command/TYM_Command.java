@@ -27,7 +27,7 @@ public class TYM_Command {
             set_model.then(Commands.literal(name).executes((context) -> {
                 CommandSourceStack stack = context.getSource();
                 if (stack.getEntity() != null && stack.getEntity() instanceof Player player)
-                    PlayerModelManager.getManager().set(player, name);
+                    PlayerModelManager.getManager().set(player.getStringUUID(), name);
                 return 0;
             }));
         }

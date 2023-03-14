@@ -18,7 +18,8 @@ public class PlayerModelManager {
 
     static PlayerModelManager playerModelManager;
     Map<String, String> player_model = new HashMap<>();
-    Map<String, String> player_model_old = new HashMap<>();
+
+    Map<String, GlTFModelManager.ModelData> player_model_data = new HashMap<>();
 
     public static PlayerModelManager getManager() {
         if (playerModelManager == null) playerModelManager = read();
@@ -47,20 +48,34 @@ public class PlayerModelManager {
         return manager;
     }
 
-    public void set(Player player, String model_name) {
-        player_model.put(player.getStringUUID(), model_name);
+    public void set(String player_uuid, String model_name) {
+        player_model.put(player_uuid, model_name);
         async_write();
+        set_player_data(player_uuid, model_name);
+        ;
     }
 
-    public void set_old(Player player, String model_name) {
-        player_model_old.put(player.getStringUUID(), model_name);
+    private GlTFModelManager.ModelData set_player_data(String uuid, String model_name) {
+        GlTFModelManager.ModelData data = GlTFModelManager.getManager().getModelData(model_name);
+        player_model_data.put(uuid, data);
+        return data;
     }
 
-    public String get(Player player) {
-        String model_name = player_model.get(player.getStringUUID());
+    public GlTFModelManager.ModelData get(Player player) {
+        String uuid = player.getStringUUID();
+        GlTFModelManager.ModelData data = player_model_data.get(uuid);
+        if (data == null) {
+            String model_name = get_model_name(uuid);
+            data = set_player_data(uuid, model_name);
+        }
+        return data;
+    }
+
+    public String get_model_name(String player_uuid) {
+        String model_name = player_model.get(player_uuid);
         if (model_name == null) {
             model_name = "default";
-            set(player, model_name);
+            set(player_uuid, model_name);
         }
         return model_name;
     }
