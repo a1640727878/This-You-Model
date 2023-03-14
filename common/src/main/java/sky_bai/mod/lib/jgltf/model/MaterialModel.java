@@ -29,7 +29,6 @@ package sky_bai.mod.lib.jgltf.model;
 /**
  * Interface for a material model
  */
-public interface MaterialModel extends NamedModelElement
-{
+public interface MaterialModel extends NamedModelElement {
     // No common methods
 }

@@ -122,17 +122,17 @@ public class GlTFRenderer {
                 int vbo_id = glGenBuffers();
                 glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
                 ByteBuffer buffer = value.getAccessorData().createByteBuffer();
-                glBufferData(GL_ARRAY_BUFFER,buffer.rewind(),GL_STATIC_DRAW);
-                glVertexAttribPointer(i,value.getElementType().getNumComponents(),
-                        value.getComponentType(),false,
-                        value.getByteStride(),value.getByteOffset());
+                glBufferData(GL_ARRAY_BUFFER, buffer.rewind(), GL_STATIC_DRAW);
+                glVertexAttribPointer(i, value.getElementType().getNumComponents(),
+                        value.getComponentType(), false,
+                        value.getByteStride(), value.getByteOffset());
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
             }
             AccessorModel indices = primitive.getIndices();
             if (indices != null) {
                 int vbo_id = glGenBuffers();
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_id);
-                glDrawElements(primitive.getMode(),indices.getCount(),indices.getComponentType(),indices.getByteOffset());
+                glDrawElements(primitive.getMode(), indices.getCount(), indices.getComponentType(), indices.getByteOffset());
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
             }
             i++;

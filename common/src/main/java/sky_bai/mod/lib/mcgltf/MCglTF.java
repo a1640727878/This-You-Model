@@ -16,7 +16,10 @@ import sky_bai.mod.tym.manager.GlTFModelManager;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -25,21 +28,62 @@ public abstract class MCglTF {
 
     public static final String RESOURCE_LOCATION = "resourceLocation";
     public static final Logger logger = LogManager.getLogger("McGlTF");
+    private static final String SKINNING_SHADER = """
+            #version 430
+                        
+            layout(location = 0) in vec4 joint;
+            layout(location = 1) in vec4 weight;
+            layout(location = 2) in vec3 position;
+            layout(location = 3) in vec3 normal;
+            layout(location = 4) in vec4 tangent;
+                        
+            layout(std430, binding = 0) readonly buffer jointMatrixBuffer {mat4 jointMatrices[];};
+                        
+            out vec3 outPosition;
+            out vec3 outNormal;
+            out vec4 outTangent;
+                        
+            void main {
+                mat4 skinMatrix = weight.x * jointMatrices[int(joint.x)] + weight.y * jointMatrices[int(joint.y)] + weight.z * jointMatrices[int(joint.z)] + weight.w * jointMatrices[int(joint.w)];
+                outPosition = (skinMatrix * vec4(position, 1.0)).xyz;
+                mat3 upperLeft = mat3(skinMatrix);
+                outNormal = upperLeft * normal;
+                outTangent.xyz = upperLeft * tangent.xyz;
+                outTangent.w = tangent.w;
+            }
+                        
+            """;
     private static MCglTF INSTANCE;
+    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
+    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedImageResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
+    private final List<Runnable> gltfRenderData = new ArrayList<Runnable>();
+    private int glProgramSkinning = -1;
+    private int defaultColorMap;
+    private int defaultNormalMap;
+    private AbstractTexture lightTexture;
+
 
     public MCglTF() {
     }
 
-    private int glProgramSkinning = -1;
-    private int defaultColorMap;
-    private int defaultNormalMap;
+    public static MCglTF getInstance() {
+        return INSTANCE;
+    }
 
-    private AbstractTexture lightTexture;
+    public static void setINSTANCE(MCglTF instance) {
+        INSTANCE = instance;
+    }
 
-    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
-    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedImageResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
-    private final List<Runnable> gltfRenderData = new ArrayList<Runnable>();
-
+    public static void lookup(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, GlTFModelManager.ModelData data) {
+        String name = data.name;
+        GltfModel model = data.model;
+        MutablePair<GltfModel, List<GlTFModelManager.ModelData>> pair = lookup.get(name);
+        if (pair == null) {
+            pair = MutablePair.of(model, new ArrayList<>());
+            lookup.put(name, pair);
+        }
+        pair.getRight().add(data);
+    }
 
     public int getGlProgramSkinning() {
         return glProgramSkinning;
@@ -52,6 +96,7 @@ public abstract class MCglTF {
     public void setDefaultColorMap(int defaultColorMap) {
         this.defaultColorMap = defaultColorMap;
     }
+
     public int getDefaultNormalMap() {
         return defaultNormalMap;
     }
@@ -138,39 +183,6 @@ public abstract class MCglTF {
         return gltfRenderData;
     }
 
-    public static MCglTF getInstance() {
-        return INSTANCE;
-    }
-    public static void setINSTANCE(MCglTF instance){
-        INSTANCE = instance;
-    }
-
-    private static final String SKINNING_SHADER = """
-            #version 430
-                        
-            layout(location = 0) in vec4 joint;
-            layout(location = 1) in vec4 weight;
-            layout(location = 2) in vec3 position;
-            layout(location = 3) in vec3 normal;
-            layout(location = 4) in vec4 tangent;
-                        
-            layout(std430, binding = 0) readonly buffer jointMatrixBuffer {mat4 jointMatrices[];};
-                        
-            out vec3 outPosition;
-            out vec3 outNormal;
-            out vec4 outTangent;
-                        
-            void main {
-                mat4 skinMatrix = weight.x * jointMatrices[int(joint.x)] + weight.y * jointMatrices[int(joint.y)] + weight.z * jointMatrices[int(joint.z)] + weight.w * jointMatrices[int(joint.w)];
-                outPosition = (skinMatrix * vec4(position, 1.0)).xyz;
-                mat3 upperLeft = mat3(skinMatrix);
-                outNormal = upperLeft * normal;
-                outTangent.xyz = upperLeft * tangent.xyz;
-                outTangent.w = tangent.w;
-            }
-                        
-            """;
-
     public void createSkinningProgram() {
         int glShader = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
         GL20.glShaderSource(glShader, SKINNING_SHADER);
@@ -187,27 +199,27 @@ public abstract class MCglTF {
         lookup.forEach((modelLocation, receivers) -> {
             List<GlTFModelManager.ModelData> list = receivers.getRight();
             for (GlTFModelManager.ModelData data : list) {
-                if (data.getData().isReceiveSharedModel(receivers.getLeft(),gltfRenderData)){
+                if (data.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
                     RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
                     data.getData().onReceiveSharedModel(renderedModel);
                 }
             }
 
             /**Iterator<GlTFModelManager.ModelData> iterator = receivers.getRight().iterator();
-            do {
-                GlTFModelManager.ModelData receiver = iterator.next();
-                if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
-                    RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
-                    receiver.getData().onReceiveSharedModel(renderedModel);
-                    while (iterator.hasNext()) {
-                        receiver = iterator.next();
-                        if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
-                            receiver.getData().onReceiveSharedModel(renderedModel);
-                        }
-                    }
-                    return;
-                }
-            } while (iterator.hasNext());*/
+             do {
+             GlTFModelManager.ModelData receiver = iterator.next();
+             if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
+             RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
+             receiver.getData().onReceiveSharedModel(renderedModel);
+             while (iterator.hasNext()) {
+             receiver = iterator.next();
+             if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
+             receiver.getData().onReceiveSharedModel(renderedModel);
+             }
+             }
+             return;
+             }
+             } while (iterator.hasNext());*/
         });
     }
 
@@ -216,17 +228,6 @@ public abstract class MCglTF {
         GL15.glBindBuffer(GL30.GL_TRANSFORM_FEEDBACK_BUFFER, 0);
         GL15.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, 0);
         GL40.glBindTransformFeedback(GL40.GL_TRANSFORM_FEEDBACK, 0);
-    }
-
-    public static void lookup(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, GlTFModelManager.ModelData data){
-        String name = data.name;
-        GltfModel model = data.model;
-        MutablePair<GltfModel, List<GlTFModelManager.ModelData>> pair = lookup.get(name);
-        if (pair == null) {
-            pair = MutablePair.of(model,new ArrayList<>());
-            lookup.put(name,pair);
-        }
-        pair.getRight().add(data);
     }
 
 }

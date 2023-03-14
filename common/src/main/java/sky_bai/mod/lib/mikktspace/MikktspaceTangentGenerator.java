@@ -43,25 +43,23 @@ import java.util.List;
  * C Source code can be found here
  * https://developer.blender.org/diffusion/B/browse/master/intern/mikktspace/mikktspace.c
  * https://developer.blender.org/diffusion/B/browse/master/intern/mikktspace/mikktspace.h
- * 
+ * <p>
  * Mikktspace looks like the new standard of tangent generation in 3-D software.
  * Xnormal, Blender, Substance painter, and many more use it.
- * 
+ * <p>
  * Usage is :
  * MikktspaceTangentGenerator.generate(spatial);
- * 
- * 
- * 
+ *
  * @author Nehon
  */
 public class MikktspaceTangentGenerator {
 
+    static final int CELLS = 2048;
     private final static int MARK_DEGENERATE = 1;
     private final static int QUAD_ONE_DEGEN_TRI = 2;
     private final static int GROUP_WITH_ANY = 4;
     private final static int ORIENT_PRESERVING = 8;
     private final static long INTERNAL_RND_SORT_SEED = 39871946 & 0xffffffffL;
-    static final int CELLS = 2048;
 
     /**
      * A private constructor to inhibit instantiation of this class.
@@ -116,7 +114,7 @@ public class MikktspaceTangentGenerator {
         int iNrActiveGroups, index;
         final int iNrFaces = mikkTSpace.getNumFaces();
         //boolean bRes = false;
-        final float fThresCos = Mth.cos((angularThreshold * (float)Math.PI) / 180.0f);
+        final float fThresCos = Mth.cos((angularThreshold * (float) Math.PI) / 180.0f);
 
         // count triangles on supported faces
         for (int f = 0; f < iNrFaces; f++) {
@@ -238,7 +236,7 @@ public class MikktspaceTangentGenerator {
         return true;
     }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // it is IMPORTANT that this function is called to evaluate the hash since
     // inlining could potentially reorder instructions and generate different
     // results for the same effective input value fVal.
@@ -872,15 +870,15 @@ public class MikktspaceTangentGenerator {
             for (int i = 0; i < 3; i++) {
                 // if not assigned to a group
                 if ((pTriInfos[f].flag & GROUP_WITH_ANY) == 0 && pTriInfos[f].assignedGroup[i] == null) {
-                    boolean bOrPre;                    
+                    boolean bOrPre;
                     final int vert_index = piTriListIn[f * 3 + i];
                     assert (iNrActiveGroups < iNrMaxGroups);
-                    pTriInfos[f].assignedGroup[i] = new Group(); 
+                    pTriInfos[f].assignedGroup[i] = new Group();
                     pGroups[iNrActiveGroups] = pTriInfos[f].assignedGroup[i];
                     pTriInfos[f].assignedGroup[i].vertexRepresentative = vert_index;
                     pTriInfos[f].assignedGroup[i].orientationPreserving = (pTriInfos[f].flag & ORIENT_PRESERVING) != 0;
                     pTriInfos[f].assignedGroup[i].nrFaces = 0;
-                    
+
                     ++iNrActiveGroups;
 
                     addTriToGroup(pTriInfos[f].assignedGroup[i], f);
@@ -891,7 +889,7 @@ public class MikktspaceTangentGenerator {
                         // neighbor
                         final boolean bAnswer
                                 = assignRecur(piTriListIn, pTriInfos, neigh_indexL,
-                                        pTriInfos[f].assignedGroup[i]);
+                                pTriInfos[f].assignedGroup[i]);
 
                         final boolean bOrPre2 = (pTriInfos[neigh_indexL].flag & ORIENT_PRESERVING) != 0;
                         final boolean bDiff = bOrPre != bOrPre2;
@@ -902,7 +900,7 @@ public class MikktspaceTangentGenerator {
                         // neighbor
                         final boolean bAnswer
                                 = assignRecur(piTriListIn, pTriInfos, neigh_indexR,
-                                        pTriInfos[f].assignedGroup[i]);
+                                pTriInfos[f].assignedGroup[i]);
 
                         final boolean bOrPre2 = (pTriInfos[neigh_indexR].flag & ORIENT_PRESERVING) != 0;
                         final boolean bDiff = bOrPre != bOrPre2;
@@ -915,9 +913,9 @@ public class MikktspaceTangentGenerator {
                     for (int j = 0; j < faceIndices.length; j++) {
                         faceIndices[j] = pTriInfos[f].assignedGroup[i].faceIndices.get(j);
                     }
-                    
+
                     //Nehon: copy back the faceIndices data into the groupTriangleBuffer.
-                    System.arraycopy( faceIndices, 0, piGroupTrianglesBuffer, iOffset, pTriInfos[f].assignedGroup[i].nrFaces);
+                    System.arraycopy(faceIndices, 0, piGroupTrianglesBuffer, iOffset, pTriInfos[f].assignedGroup[i].nrFaces);
                     // update offset
                     iOffset += pTriInfos[f].assignedGroup[i].nrFaces;
                     // since the groups are disjoint a triangle can never
@@ -995,8 +993,8 @@ public class MikktspaceTangentGenerator {
     }
 
     static boolean generateTSpaces(TSpace psTspace[], final TriInfo pTriInfos[], final Group pGroups[],
-            final int iNrActiveGroups, final int piTriListIn[], final float fThresCos,
-            final MikkTSpaceContext mikkTSpace) {
+                                   final int iNrActiveGroups, final int piTriListIn[], final float fThresCos,
+                                   final MikkTSpaceContext mikkTSpace) {
         TSpace[] pSubGroupTspace;
         SubGroup[] pUniSubGroups;
         int[] pTmpMembers;
@@ -1141,16 +1139,16 @@ public class MikktspaceTangentGenerator {
     }
 
     static TSpace evalTspace(int face_indices[], final int iFaces, final int piTriListIn[], final TriInfo pTriInfos[],
-            final MikkTSpaceContext mikkTSpace, final int iVertexRepresentative) {
+                             final MikkTSpaceContext mikkTSpace, final int iVertexRepresentative) {
         TSpace res = new TSpace();
-        float fAngleSum = 0;        
+        float fAngleSum = 0;
 
         for (int face = 0; face < iFaces; face++) {
             final int f = face_indices[face];
 
             // only valid triangles get to add their contribution
             if ((pTriInfos[f].flag & GROUP_WITH_ANY) == 0) {
-                
+
                 int i = -1;
                 if (piTriListIn[3 * f + 0] == iVertexRepresentative) {
                     i = 0;
@@ -1175,7 +1173,7 @@ public class MikktspaceTangentGenerator {
 
                 Vector3f p0 = getPosition(mikkTSpace, i0);
                 Vector3f p1 = getPosition(mikkTSpace, i1);
-                Vector3f  p2 = getPosition(mikkTSpace, i2);
+                Vector3f p2 = getPosition(mikkTSpace, i2);
                 Vector3f v1 = p0.subtract(p1);
                 Vector3f v2 = p2.subtract(p1);
 
@@ -1212,11 +1210,11 @@ public class MikktspaceTangentGenerator {
     }
 
     static boolean compareSubGroups(final SubGroup pg1, final SubGroup pg2) {
-        if(pg2 == null || (pg1.nrFaces != pg2.nrFaces)){
+        if (pg2 == null || (pg1.nrFaces != pg2.nrFaces)) {
             return false;
         }
         boolean stillSame = true;
-        int i = 0;        
+        int i = 0;
         while (i < pg1.nrFaces && stillSame) {
             stillSame = pg1.triMembers[i] == pg2.triMembers[i];
             if (stillSame) {
@@ -1272,7 +1270,7 @@ public class MikktspaceTangentGenerator {
     static void buildNeighborsFast(TriInfo pTriInfos[], Edge[] pEdges, final int piTriListIn[], final int iNrTrianglesIn) {
         // build array of edges
         long uSeed = INTERNAL_RND_SORT_SEED;        // could replace with a random seed?
-        
+
         for (int f = 0; f < iNrTrianglesIn; f++) {
             for (int i = 0; i < 3; i++) {
                 final int i0 = piTriListIn[f * 3 + i];
@@ -1365,7 +1363,7 @@ public class MikktspaceTangentGenerator {
     }
 
     static void buildNeighborsSlow(TriInfo pTriInfos[], final int piTriListIn[], final int iNrTrianglesIn) {
-        
+
         for (int f = 0; f < iNrTrianglesIn; f++) {
             for (int i = 0; i < 3; i++) {
                 // if unassigned
@@ -1428,7 +1426,7 @@ public class MikktspaceTangentGenerator {
         t = (uSeed << t) | (uSeed >> (32 - t));
         uSeed = uSeed + t + 3;
         // Random end
-        
+
         uSeed = uSeed & 0xffffffffL;
 
         int iL = iLeft;
@@ -1464,7 +1462,7 @@ public class MikktspaceTangentGenerator {
         }
     }
 
-// resolve ordering and edge number
+    // resolve ordering and edge number
     static void getEdge(int[] i0_out, int[] i1_out, int[] edgenum_out, final int[] indices, final int i0_in, final int i1_in) {
         edgenum_out[0] = -1;
 
@@ -1489,7 +1487,7 @@ public class MikktspaceTangentGenerator {
     }
 
     static void degenPrologue(TriInfo pTriInfos[], int piTriList_out[], final int iNrTrianglesIn, final int iTotTris) {
-        
+
         // locate quads with only one good triangle
         int t = 0;
         while (t < (iTotTris - 1)) {
@@ -1521,7 +1519,7 @@ public class MikktspaceTangentGenerator {
                 if (iNextGoodTriangleSearchIndex < (t + 2)) {
                     iNextGoodTriangleSearchIndex = t + 2;
                 }
-            } else {                
+            } else {
                 // search for the first good triangle.
                 boolean bJustADegenerate = true;
                 while (bJustADegenerate && iNextGoodTriangleSearchIndex < iTotTris) {
@@ -1539,7 +1537,7 @@ public class MikktspaceTangentGenerator {
                 assert (iNextGoodTriangleSearchIndex > (t + 1));
 
                 // swap triangle t0 and t1
-                if (!bJustADegenerate) {                    
+                if (!bJustADegenerate) {
                     for (int i = 0; i < 3; i++) {
                         final int index = piTriList_out[t0 * 3 + i];
                         piTriList_out[t0 * 3 + i] = piTriList_out[t1 * 3 + i];
@@ -1565,7 +1563,7 @@ public class MikktspaceTangentGenerator {
     }
 
     static void DegenEpilogue(TSpace psTspace[], TriInfo pTriInfos[], int piTriListIn[], final MikkTSpaceContext mikkTSpace, final int iNrTrianglesIn, final int iTotTris) {
-        
+
         // deal with degenerate triangles
         // punishment for degenerate triangles is O(N^2)
         for (int t = iNrTrianglesIn; t < iTotTris; t++) {
@@ -1608,7 +1606,7 @@ public class MikktspaceTangentGenerator {
             // this triangle belongs to a quad where the
             // other triangle is degenerate
             if ((pTriInfos[t].flag & QUAD_ONE_DEGEN_TRI) != 0) {
-               
+
                 byte[] pV = pTriInfos[t].vertNum;
                 int iFlag = (1 << pV[0]) | (1 << pV[1]) | (1 << pV[2]);
                 int iMissingIndex = 0;
@@ -1639,7 +1637,7 @@ public class MikktspaceTangentGenerator {
             }
         }
 
-    }    
+    }
 
     /**
      * SubGroup inner class
@@ -1680,8 +1678,8 @@ public class MikktspaceTangentGenerator {
         float magT;
         int counter;  // this is to average back into quads.
         boolean orient;
-        
-        void set(TSpace ts){
+
+        void set(TSpace ts) {
             os.set(ts.os);
             magS = ts.magS;
             ot.set(ts.ot);
@@ -1699,31 +1697,31 @@ public class MikktspaceTangentGenerator {
 
     private static class Edge {
 
-        void setI0(int i){            
-            array[0] = i;
-        }
-        
-        void setI1(int i){            
-            array[1] = i;
-        }
-        
-        void setF(int i){            
-            array[2] = i;
-        }
-        
-        int getI0(){            
+        int[] array = new int[3];
+
+        int getI0() {
             return array[0];
         }
-        
-        int getI1(){            
+
+        void setI0(int i) {
+            array[0] = i;
+        }
+
+        int getI1() {
             return array[1];
         }
-        
-        int getF(){            
+
+        void setI1(int i) {
+            array[1] = i;
+        }
+
+        int getF() {
             return array[2];
         }
-        
-        int[] array = new int[3];
+
+        void setF(int i) {
+            array[2] = i;
+        }
     }
 
 }

@@ -41,6 +41,34 @@ import java.util.Objects;
 public class DefaultAnimationModel extends AbstractNamedModelElement
         implements AnimationModel {
     /**
+     * The {@link Channel} instances
+     * of this animation
+     */
+    private final List<Channel> channels;
+
+    /**
+     * Creates a new instance
+     */
+    public DefaultAnimationModel() {
+        this.channels = new ArrayList<Channel>();
+    }
+
+    /**
+     * Add the given {@link Channel}
+     *
+     * @param channel The {@link Channel}
+     */
+    public void addChannel(Channel channel) {
+        Objects.requireNonNull(channel, "The channel may not be null");
+        this.channels.add(channel);
+    }
+
+    @Override
+    public List<Channel> getChannels() {
+        return Collections.unmodifiableList(channels);
+    }
+
+    /**
      * Default implementation of a
      * {@link Sampler}
      */
@@ -149,34 +177,6 @@ public class DefaultAnimationModel extends AbstractNamedModelElement
             return path;
         }
 
-    }
-
-    /**
-     * The {@link Channel} instances
-     * of this animation
-     */
-    private final List<Channel> channels;
-
-    /**
-     * Creates a new instance
-     */
-    public DefaultAnimationModel() {
-        this.channels = new ArrayList<Channel>();
-    }
-
-    /**
-     * Add the given {@link Channel}
-     *
-     * @param channel The {@link Channel}
-     */
-    public void addChannel(Channel channel) {
-        Objects.requireNonNull(channel, "The channel may not be null");
-        this.channels.add(channel);
-    }
-
-    @Override
-    public List<Channel> getChannels() {
-        return Collections.unmodifiableList(channels);
     }
 
 }

@@ -38,80 +38,71 @@ import java.util.function.Supplier;
  * Implementation of a {@link CameraModel}
  */
 public final class DefaultCameraModel extends AbstractNamedModelElement
-    implements CameraModel
-{
+        implements CameraModel {
     /**
      * The {@link CameraOrthographicModel}
      */
     private CameraOrthographicModel cameraOrthographicModel;
-    
+
     /**
      * The {@link CameraPerspectiveModel}
      */
     private CameraPerspectiveModel cameraPerspectiveModel;
-    
+
     /**
      * Creates a new instance
      */
-    public DefaultCameraModel()
-    {
+    public DefaultCameraModel() {
         // Default constructor
-    }
-    
-    /**
-     * Set the {@link CameraOrthographicModel}
-     * 
-     * @param cameraOrthographicModel The {@link CameraOrthographicModel}
-     */
-    public void setCameraOrthographicModel(
-        CameraOrthographicModel cameraOrthographicModel)
-    {
-        this.cameraOrthographicModel = cameraOrthographicModel;
-    }
-    
-    @Override
-    public CameraOrthographicModel getCameraOrthographicModel()
-    {
-        return cameraOrthographicModel;
-    }
-    
-    /**
-     * Set the {@link CameraPerspectiveModel}
-     * 
-     * @param cameraPerspectiveModel The {@link CameraPerspectiveModel}
-     */
-    public void setCameraPerspectiveModel(
-        CameraPerspectiveModel cameraPerspectiveModel)
-    {
-        this.cameraPerspectiveModel = cameraPerspectiveModel;
-    }
-    
-    @Override
-    public CameraPerspectiveModel getCameraPerspectiveModel()
-    {
-        return cameraPerspectiveModel;
     }
 
     @Override
-    public float[] computeProjectionMatrix(float result[], Float aspectRatio)
-    {
+    public CameraOrthographicModel getCameraOrthographicModel() {
+        return cameraOrthographicModel;
+    }
+
+    /**
+     * Set the {@link CameraOrthographicModel}
+     *
+     * @param cameraOrthographicModel The {@link CameraOrthographicModel}
+     */
+    public void setCameraOrthographicModel(
+            CameraOrthographicModel cameraOrthographicModel) {
+        this.cameraOrthographicModel = cameraOrthographicModel;
+    }
+
+    @Override
+    public CameraPerspectiveModel getCameraPerspectiveModel() {
+        return cameraPerspectiveModel;
+    }
+
+    /**
+     * Set the {@link CameraPerspectiveModel}
+     *
+     * @param cameraPerspectiveModel The {@link CameraPerspectiveModel}
+     */
+    public void setCameraPerspectiveModel(
+            CameraPerspectiveModel cameraPerspectiveModel) {
+        this.cameraPerspectiveModel = cameraPerspectiveModel;
+    }
+
+    @Override
+    public float[] computeProjectionMatrix(float result[], Float aspectRatio) {
         return Cameras.computeProjectionMatrix(this, aspectRatio, result);
     }
-    
+
     @Override
     public Supplier<float[]> createProjectionMatrixSupplier(
-        DoubleSupplier aspectRatioSupplier)
-    {
+            DoubleSupplier aspectRatioSupplier) {
         return Suppliers.createTransformSupplier(this, (c, t) ->
         {
             Float aspectRatio = null;
-            if (aspectRatioSupplier != null)
-            {
-                aspectRatio = (float)aspectRatioSupplier.getAsDouble();
+            if (aspectRatioSupplier != null) {
+                aspectRatio = (float) aspectRatioSupplier.getAsDouble();
             }
             computeProjectionMatrix(t, aspectRatio);
         });
     }
-    
-    
+
+
 }

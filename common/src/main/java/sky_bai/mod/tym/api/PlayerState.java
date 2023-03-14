@@ -31,6 +31,14 @@ public class PlayerState {
         registerALL();
     }
 
+    public static void registerGet(String name, GetState get) {
+        MAIN_ANIM_NAME_G.add(new StateDataG(name, get));
+    }
+
+    public static void registerIs(String name, IsState is) {
+        MAIN_ANIM_NAME_I.add(new StateDataI(name, is));
+    }
+
     public void reload(float partialTick) {
         Entity vehicle = player.getVehicle();
 
@@ -49,7 +57,7 @@ public class PlayerState {
             if (!Objects.equals(key, NULL)) return new String[]{key, g.name};
         }
         for (StateDataI i : MAIN_ANIM_NAME_I) {
-            if (i.is(player,this)) return new String[]{i.name};
+            if (i.is(player, this)) return new String[]{i.name};
         }
         return new String[]{IDLE};
     }
@@ -93,12 +101,12 @@ public class PlayerState {
         });
     }
 
-    public static void registerGet(String name, GetState get) {
-        MAIN_ANIM_NAME_G.add(new StateDataG(name, get));
+    public interface IsState {
+        boolean is(Player player, PlayerState state);
     }
 
-    public static void registerIs(String name, IsState is) {
-        MAIN_ANIM_NAME_I.add(new StateDataI(name, is));
+    public interface GetState {
+        String get(Player player, PlayerState state);
     }
 
     public static class StateDataI {
@@ -136,14 +144,6 @@ public class PlayerState {
         public String getName() {
             return name;
         }
-    }
-
-    public interface IsState {
-        boolean is(Player player, PlayerState state);
-    }
-
-    public interface GetState {
-        String get(Player player, PlayerState state);
     }
 
 }

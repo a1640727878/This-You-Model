@@ -13,7 +13,6 @@ import sky_bai.mod.lib.jgltf.model.*;
 import sky_bai.mod.lib.jgltf.model.image.PixelData;
 import sky_bai.mod.lib.jgltf.model.image.PixelDatas;
 import sky_bai.mod.lib.jgltf.model.impl.DefaultNodeModel;
-import sky_bai.mod.lib.jgltf.model.v2.MaterialModelV2;
 import sky_bai.mod.lib.mikktspace.MikkTSpaceContext;
 import sky_bai.mod.lib.mikktspace.MikktspaceTangentGenerator;
 import sky_bai.mod.tym.api.Matrix4fAPI;

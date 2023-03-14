@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 public class MCglTF_Fabric extends MCglTF implements ModInitializer {
-    public static MCglTF_Fabric get() {
-        return (MCglTF_Fabric) MCglTF.getInstance();
-    }
-
     public MCglTF_Fabric() {
         MCglTF.setINSTANCE(this);
+    }
+
+    public static MCglTF_Fabric get() {
+        return (MCglTF_Fabric) MCglTF.getInstance();
     }
 
     @Override
@@ -85,8 +85,8 @@ public class MCglTF_Fabric extends MCglTF implements ModInitializer {
 
                 Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup = new HashMap<>();
 
-                GlTFModelManager.getManager().getGlTF().forEach(data -> lookup(lookup,data));
-                lookup(lookup,GlTFModelManager.getManager().getDefaultModelData());
+                GlTFModelManager.getManager().getGlTF().forEach(data -> lookup(lookup, data));
+                lookup(lookup, GlTFModelManager.getManager().getDefaultModelData());
 
                 processRenderedGltfModels(lookup);
 

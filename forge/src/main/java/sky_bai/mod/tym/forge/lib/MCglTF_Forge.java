@@ -24,16 +24,16 @@ import java.util.Map;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class MCglTF_Forge extends MCglTF {
 
-    public static MCglTF get() {
-        return MCglTF.getInstance();
-    }
-
     public MCglTF_Forge() {
         MCglTF.setINSTANCE(this);
         Minecraft.getInstance().execute(() -> {
             //Since max OpenGL version on Windows from GLCapabilities will always return 3.2 as of Minecraft 1.17, this is a workaround to check if OpenGL 4.3 is available.
             get().createSkinningProgram();
         });
+    }
+
+    public static MCglTF get() {
+        return MCglTF.getInstance();
     }
 
     //Configs from ForgeConfigSpec is not yet loaded at this event.

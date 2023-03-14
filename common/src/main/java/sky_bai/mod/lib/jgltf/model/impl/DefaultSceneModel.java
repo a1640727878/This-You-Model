@@ -37,34 +37,30 @@ import java.util.List;
  * Implementation of a {@link SceneModel}
  */
 public class DefaultSceneModel extends AbstractNamedModelElement
-    implements SceneModel
-{
+        implements SceneModel {
     /**
      * The list of root nodes
      */
     private final List<NodeModel> nodeModels;
-    
+
     /**
      * Creates a new instance
      */
-    public DefaultSceneModel()
-    {
+    public DefaultSceneModel() {
         this.nodeModels = new ArrayList<NodeModel>();
     }
-    
+
     /**
      * Add the given (root) {@link NodeModel} to this scene
-     * 
+     *
      * @param node The {@link NodeModel}
      */
-    public void addNode(NodeModel node)
-    {
-       nodeModels.add(node); 
+    public void addNode(NodeModel node) {
+        nodeModels.add(node);
     }
-    
+
     @Override
-    public List<NodeModel> getNodeModels()
-    {
+    public List<NodeModel> getNodeModels() {
         return Collections.unmodifiableList(nodeModels);
     }
 

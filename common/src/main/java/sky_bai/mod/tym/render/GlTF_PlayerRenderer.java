@@ -40,15 +40,27 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         super(context, b);
     }
 
+    private static float sleepDirectionToRotation(Direction facing) {
+        return switch (facing) {
+            case SOUTH -> 90.0f;
+            case NORTH -> 270.0f;
+            case EAST -> 180.0f;
+            default -> 0.0f;
+        };
+    }
+
     @Override
-    public void render(AbstractClientPlayer entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+    public void render(AbstractClientPlayer player, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+        float netHeadPitch = Mth.rotLerp(partialTicks, player.xRotO, player.getXRot());
+        float netHeadYaw = Mth.rotLerp(partialTicks, player.yHeadRotO, player.yHeadRot) - Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+
         if (is_open) {
-            render_model(entity, entityYaw, partialTicks, matrixStack, packedLight);
-            render_item(entity, entityYaw, partialTicks, matrixStack, buffer, packedLight);
-            if (this.shouldShowName(entity))
-                renderNameTag(entity, entity.getDisplayName(), matrixStack, buffer, packedLight);
+            render_model(player, entityYaw, partialTicks, matrixStack, packedLight, netHeadPitch, netHeadYaw);
+            render_item(player, entityYaw, partialTicks, matrixStack, buffer, packedLight, netHeadPitch, netHeadYaw);
+            if (this.shouldShowName(player))
+                renderNameTag(player, player.getDisplayName(), matrixStack, buffer, packedLight);
         } else {
-            super.render(entity, entityYaw, partialTicks, matrixStack, buffer, packedLight);
+            super.render(player, entityYaw, partialTicks, matrixStack, buffer, packedLight);
         }
     }
 
@@ -87,23 +99,13 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         matrixStack.scale(size, size, size);
     }
 
-
-    private static float sleepDirectionToRotation(Direction facing) {
-        return switch (facing) {
-            case SOUTH -> 90.0f;
-            case NORTH -> 270.0f;
-            case EAST -> 180.0f;
-            default -> 0.0f;
-        };
-    }
-
-    private void setRotations(AbstractClientPlayer player, PoseStack matrixStack, float rotationYaw, float partialTicks) {
+    private void setRotations(AbstractClientPlayer player, PoseStack matrixStack, float rotationYaw, float partialTicks, float netHeadPitch, float netHeadYaw) {
 
         float swimAmount;
         Pose pose = player.getPose();
 
         if (pose != Pose.SLEEPING) { // 正常旋转
-            matrixStack.mulPose(Vector3f.YP.rotationDegrees(-rotationYaw));
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(-(rotationYaw - netHeadYaw)));
         }
         if (player.deathTime > 0) { // 死亡
             float f = (player.deathTime + partialTicks - 1.0f) / 20.0f * 1.6f;
@@ -143,14 +145,14 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         return left_hand ? ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND;
     }
 
-    private void setHandItem(NodeModel node, ItemStack itemStack, AbstractClientPlayer player, boolean left_hand, PoseStack matrixStack, float rotationYaw, float partialTicks, MultiBufferSource buffer, int packedLight) {
+    private void setHandItem(NodeModel node, ItemStack itemStack, AbstractClientPlayer player, boolean left_hand, PoseStack matrixStack, float rotationYaw, float partialTicks, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
         ItemInHandRenderer item_renderer = Minecraft.getInstance().getItemInHandRenderer();
 
         org.joml.Matrix4f matrix4f = getMatrix4f(node);
         float[] matrix_4x4 = RenderedGltfModel.findGlobalTransform(node);
         matrix4f.add(new Matrix4f().set(matrix_4x4));
         matrixStack.pushPose();
-        setRotations(player, matrixStack, rotationYaw, partialTicks);
+        setRotations(player, matrixStack, rotationYaw, partialTicks, netHeadPitch, netHeadYaw);
         org.joml.Vector3f translation = new org.joml.Vector3f();
         matrix4f.getTranslation(translation);
         matrixStack.translate(translation.x, translation.y, translation.z);
@@ -168,7 +170,7 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         matrixStack.popPose();
     }
 
-    private void render_item(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+    private void render_item(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
         for (Map.Entry<String, NodeModel> entry : getData(player).getCoreNode().entrySet()) {
             NodeModel node = entry.getValue();
             String key = entry.getKey();
@@ -176,14 +178,14 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
             boolean left_hand = player.getMainArm() == HumanoidArm.LEFT;
 
             if (key.equals("LeftHandLocator") && (itemStack = getItemStack(player, left_hand)) != null) {
-                setHandItem(node, itemStack, player, left_hand, matrixStack, rotationYaw, partialTicks, buffer, packedLight);
+                setHandItem(node, itemStack, player, left_hand, matrixStack, rotationYaw, partialTicks, buffer, packedLight, netHeadPitch, netHeadYaw);
             } else if (key.equals("RightHandLocator") && (itemStack = getItemStack(player, !left_hand)) != null) {
-                setHandItem(node, itemStack, player, !left_hand, matrixStack, rotationYaw, partialTicks, buffer, packedLight);
+                setHandItem(node, itemStack, player, !left_hand, matrixStack, rotationYaw, partialTicks, buffer, packedLight, netHeadPitch, netHeadYaw);
             }
         }
     }
 
-    private void render_model(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, int packedLight) {
+    private void render_model(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, int packedLight, float netHeadPitch, float netHeadYaw) {
 
         if (player.isSpectator()) return;
 
@@ -197,24 +199,21 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         }
 
         // 头上下
-        float netHeadPitch = Mth.rotLerp(partialTicks, player.xRotO, player.getXRot());
         float head_pitch = netHeadPitch * (float) (Math.PI / 180);
         // 头左右
-        float netHeadYaw = Mth.rotLerp(partialTicks, player.yHeadRotO, player.yHeadRot) - Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
         float head_yaw = netHeadYaw * (float) (Math.PI / 180);
         // 硬编码动画 - 转头
         if (!player.isVisuallySwimming()) {
             // 头上下
             for (Map.Entry<String, NodeModel> entry : getData(player).getCoreNode().entrySet()) {
                 NodeModel node = entry.getValue();
-                if (entry.getKey().equals("Head")) node.setRotation(new float[]{-head_pitch * 0.5f, 0.0f, 0.0f, 1.0f});
-                else if (entry.getKey().equals("Body_ALL")) node.setRotation(new float[]{0, head_yaw * 0.5f, 0, 1});
+                if (entry.getKey().equals("Head"))
+                    node.setRotation(new float[]{-head_pitch * 0.5f, -head_yaw * 0.5f, 0.0f, 1.0f});
             }
         } else {
             for (Map.Entry<String, NodeModel> entry : getData(player).getCoreNode().entrySet()) {
                 NodeModel node = entry.getValue();
                 if (entry.getKey().equals("Head")) node.setRotation(new float[]{-0.3f, head_yaw * 0.5f, 0, 1});
-                else if (entry.getKey().equals("Body_ALL")) node.setRotation(new float[]{0, 0, 0, 1});
             }
 
         }
@@ -233,7 +232,7 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
 
         matrixStack.pushPose();
         // 设置旋转
-        setRotations(player, matrixStack, rotationYaw, partialTicks);
+        setRotations(player, matrixStack, rotationYaw, partialTicks, netHeadPitch, netHeadYaw);
 
         // 设置结果
         RenderedGltfModel.CURRENT_POSE = matrixStack.last().pose();

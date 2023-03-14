@@ -4,9 +4,13 @@ public class ModelType<T> {
     final boolean b;
     final T t;
 
-    private ModelType(T t, boolean b){
+    private ModelType(T t, boolean b) {
         this.t = t;
         this.b = b;
+    }
+
+    public static <T> ModelType.Builder<T> builder() {
+        return new ModelType.Builder<>();
     }
 
     public boolean is() {
@@ -17,17 +21,12 @@ public class ModelType<T> {
         return t;
     }
 
-
-    public static <T> ModelType.Builder<T> builder(){
-        return new ModelType.Builder<>();
-    }
-
-    public static class Builder<T>{
+    public static class Builder<T> {
         boolean b = false;
         T t = null;
 
-        public ModelType<T> build(){
-            return new ModelType<T>(t,b);
+        public ModelType<T> build() {
+            return new ModelType<T>(t, b);
         }
 
         public ModelType.Builder<T> set(T t) {
