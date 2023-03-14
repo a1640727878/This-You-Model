@@ -28,7 +28,11 @@ public class PlayerModelManager {
 
     public String get(Player player) {
         String model_name = player_model.get(player.getStringUUID());
-        return model_name != null ? model_name : "default";
+        if (model_name == null){
+            model_name = "default";
+            set(player,model_name);
+        }
+        return model_name;
     }
 
     public static PlayerModelManager read(){
