@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
@@ -30,6 +32,7 @@ import sky_bai.mod.tym.manager.PlayerModelManager;
 
 import java.util.Map;
 
+@Environment(value = EnvType.CLIENT)
 public class GlTF_PlayerRenderer extends PlayerRenderer {
 
     boolean is_open = true;
@@ -52,9 +55,9 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         float netHeadPitch = Mth.rotLerp(partialTicks, player.xRotO, player.getXRot());
         float netHeadYaw = Mth.rotLerp(partialTicks, player.yHeadRotO, player.yHeadRot) - Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
 
-        if (is_open) {
-            render_model(player, entityYaw, partialTicks, matrixStack, packedLight, netHeadPitch, netHeadYaw);
-            render_item(player, entityYaw, partialTicks, matrixStack, buffer, packedLight, netHeadPitch, netHeadYaw);
+        if (PlayerModelManager.getManager().isOpen(player)) {
+            renderModel(player, entityYaw, partialTicks, matrixStack, packedLight, netHeadPitch, netHeadYaw);
+            renderItem(player, entityYaw, partialTicks, matrixStack, buffer, packedLight, netHeadPitch, netHeadYaw);
             if (this.shouldShowName(player))
                 renderNameTag(player, player.getDisplayName(), matrixStack, buffer, packedLight);
             getData(player).resetNode();
@@ -165,7 +168,7 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         matrixStack.popPose();
     }
 
-    private void render_item(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
+    private void renderItem(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
         for (Map.Entry<String, NodeModel> entry : getData(player).getCoreNode().entrySet()) {
             NodeModel node = entry.getValue();
             String key = entry.getKey();
@@ -180,7 +183,7 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         }
     }
 
-    private void render_model(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, int packedLight, float netHeadPitch, float netHeadYaw) {
+    private void renderModel(AbstractClientPlayer player, float rotationYaw, float partialTicks, PoseStack matrixStack, int packedLight, float netHeadPitch, float netHeadYaw) {
 
         if (player.isSpectator()) return;
 

@@ -50,7 +50,7 @@ processResources {
 shadowJar {
     exclude "architectury.common.json"
 
-    relocate "org.joml","sky_bai.mod.lib.joml"
+    relocate "org.joml", "sky_bai.mod.lib.joml"
 
     configurations = [project.configurations.shadowCommon]
     classifier "all"

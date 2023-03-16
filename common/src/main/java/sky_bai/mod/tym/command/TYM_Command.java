@@ -2,6 +2,7 @@ package sky_bai.mod.tym.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
@@ -17,13 +18,13 @@ public class TYM_Command {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("tym");
         Set<GlTFModelManager.ModelData> data = GlTFModelManager.getManager().getGlTF();
-        List<String> model_name = new ArrayList<>(data.size());
-        data.forEach(d -> model_name.add(d.name));
-        model_name.add(GlTFModelManager.getManager().getDefaultModelData().name);
+        List<String> modelName = new ArrayList<>(data.size());
+        data.forEach(d -> modelName.add(d.name));
+        modelName.add(GlTFModelManager.getManager().getDefaultModelData().name);
 
         LiteralArgumentBuilder<CommandSourceStack> set_model = Commands.literal("set_model");
 
-        for (String name : model_name) {
+        for (String name : modelName) {
             set_model.then(Commands.literal(name).executes((context) -> {
                 CommandSourceStack stack = context.getSource();
                 if (stack.getEntity() != null && stack.getEntity() instanceof Player player)
@@ -32,8 +33,22 @@ public class TYM_Command {
             }));
         }
 
-        command.then(set_model);
+        LiteralArgumentBuilder<CommandSourceStack> rule = Commands.literal("rule");
+
+        rule.then(Commands.literal("me_model")
+                .then(Commands.literal("true").executes(context -> setOpen(context, true)))
+                .then(Commands.literal("false").executes(context -> setOpen(context, false))));
+
+        command.then(set_model).then(rule);
         dispatcher.register(command);
+    }
+
+
+    private static int setOpen(CommandContext<CommandSourceStack> context, boolean b) {
+        CommandSourceStack stack = context.getSource();
+        if (stack.getEntity() != null && stack.getEntity() instanceof Player player)
+            PlayerModelManager.getManager().setOpen(player, b);
+        return 0;
     }
 
 }

@@ -2,6 +2,7 @@ package sky_bai.mod.tym.lib.mcgltf;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.*;
 
@@ -16,7 +17,7 @@ public class RenderedGltfScene {
 
     public final List<Runnable> shaderModRenderCommands = new ArrayList<Runnable>();
 
-    ShaderInstance SHADER;
+    ShaderInstance SHADER = GameRenderer.getRendertypeEntityCutoutNoCullShader();
 
     public void setShader(ShaderInstance SHADER) {
         this.SHADER = SHADER;

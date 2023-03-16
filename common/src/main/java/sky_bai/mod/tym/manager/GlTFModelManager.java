@@ -1,11 +1,10 @@
 package sky_bai.mod.tym.manager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.entity.player.Player;
+import sky_bai.mod.tym.ThisYouModel_Main;
 import sky_bai.mod.tym.api.PlayerState;
 import sky_bai.mod.tym.lib.jgltf.model.AnimationModel;
 import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
@@ -40,9 +39,10 @@ public class GlTFModelManager {
     }
 
     public void reload() {
-        if (Files.notExists(Manager_Dirs.MODELS_DIR)) {
+        if (Files.notExists(DirectoryManager.MODELS_DIR)) {
             try {
-                Files.createDirectories(Manager_Dirs.MODELS_DIR);
+                Files.createDirectories(DirectoryManager.MODELS_DIR);
+                ThisYouModel_Main.LOGGER.info("Create ThisYouModel Folder...");
             } catch (IOException ignored) {
             }
         }
@@ -85,7 +85,7 @@ public class GlTFModelManager {
     }
 
     private void setModelPaths() {
-        File[] files = Manager_Dirs.MODELS_DIR.toFile().listFiles();
+        File[] files = DirectoryManager.MODELS_DIR.toFile().listFiles();
         if (files == null) return;
         for (File file : files) {
             File[] fs;
@@ -114,7 +114,7 @@ public class GlTFModelManager {
             Resource resource = Minecraft.getInstance().getResourceManager().getResource(location);
             InputStream is = resource.getInputStream();
             return new GltfModelReader().readWithoutReferences(is);
-        } catch (IOException | IndexOutOfBoundsException e) {
+        } catch (IOException | RuntimeException e) {
             return null;
         }
     }
@@ -135,14 +135,6 @@ public class GlTFModelManager {
         }
     }
 
-
-    public static class NodeData {
-        float[] matrix;
-        float[] translation;
-        float[] rotation;
-        float[] scale;
-    }
-
     public static class RendererData {
 
         protected RenderedGltfScene renderedScene;
@@ -153,15 +145,8 @@ public class GlTFModelManager {
 
         protected Set<NodeModel> animNode;
 
-        ShaderInstance SHADER = GameRenderer.getRendertypeEntityCutoutNoCullShader();
-
-        public void setShader(ShaderInstance SHADER) {
-            this.SHADER = SHADER;
-        }
-
         public void onReceiveSharedModel(RenderedGltfModel renderedModel) {
             renderedScene = renderedModel.renderedGltfScenes.get(0);
-            renderedScene.setShader(SHADER);
             List<AnimationModel> animationModels = renderedModel.gltfModel.getAnimationModels();
             animations = new HashMap<>(animationModels.size());
             animNode = new HashSet<>();
@@ -196,7 +181,7 @@ public class GlTFModelManager {
             return animations;
         }
 
-        public List<InterpolatedChannel> getMainAnimation(AbstractClientPlayer player, float partialTick) {
+        public List<InterpolatedChannel> getMainAnimation(Player player, float partialTick) {
             List<InterpolatedChannel> list;
             PlayerState state = AnimationsManager.getManager().refreshPlayerState(player, partialTick);
             String[] main_name = state.getMainAnimName();

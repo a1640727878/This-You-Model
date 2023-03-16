@@ -230,4 +230,34 @@ public abstract class MCglTF {
         GL40.glBindTransformFeedback(GL40.GL_TRANSFORM_FEEDBACK, 0);
     }
 
+    public void initializeGL() {
+        Minecraft.getInstance().execute(() -> {
+            setLightTexture(Minecraft.getInstance().getTextureManager().getTexture(new ResourceLocation("dynamic/light_map_1")));
+
+            //Since max OpenGL version on Windows from GLCapabilities will always return 3.2 as of Minecraft 1.17, this is a workaround to check if OpenGL 4.3 is available.
+            createSkinningProgram();
+
+            GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
+            GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 4);
+
+            int currentTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+
+            setDefaultColorMap(GL11.glGenTextures());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, getDefaultColorMap());
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 2, 2, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, Buffers.create(new byte[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}));
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_BASE_LEVEL, 0);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 0);
+
+            setDefaultNormalMap(GL11.glGenTextures());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, getDefaultNormalMap());
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 2, 2, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, Buffers.create(new byte[]{-128, -128, -1, -1, -128, -128, -1, -1, -128, -128, -1, -1, -128, -128, -1, -1}));
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_BASE_LEVEL, 0);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 0);
+
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, currentTexture);
+        });
+    }
+
 }
