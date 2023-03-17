@@ -19,34 +19,40 @@ public class NetworkManager {
     static NetworkManager manager;
 
     // 收实例 解压加载
-    public final S2C S2C_SEND_SERVER_MODEL = new S2C("s2c/send_server_model", (client, handler, buf, responseSender) -> {
-        Map<String, byte[]> server_models = GlTFModelManager.getManager().toBytesFoModels(buf.readByteArray());
-        for (Map.Entry<String, byte[]> entry : server_models.entrySet()) {
-            GlTFModelManager.getManager().addModelByte(entry.getKey(), entry.getValue());
-        }
+    public final S2C S2C_SEND_SERVER_MODEL_DATA = new S2C("s2c/send_server_model", (client, handler, buf, responseSender) -> {
+        byte[] bytes = buf.readByteArray();
+        GlTFModelManager.getManager().asyncWriteServerModel(bytes);
+        GlTFModelManager.getManager().addServerModels(bytes);
         MCglTF.getInstance().reloadManager();
     });
 
     // 收到目录发生模型实例
-    public final C2S C2S_GET_SERVER_MODEL = new C2S("c2s/get_server_model", (server, player, handler, buf, responseSender) -> {
+    public final C2S C2S_GET_SERVER_MODEL_DATA = new C2S("c2s/get_server_model", (server, player, handler, buf, responseSender) -> {
         byte[] server_models = GlTFModelManager.getManager().getServerModelsBytes(IOManager.theByteBufToString(buf));
-        S2C_SEND_SERVER_MODEL.send(player, IOManager.getFriendlyByteBuf().writeByteArray(server_models));
+        S2C_SEND_SERVER_MODEL_DATA.send(player, IOManager.getFriendlyByteBuf().writeByteArray(server_models));
     });
 
     // 客户端接收到 并向发送没有的模型目录
-    public final S2C S2C_SEND_S2C_MODELS = new S2C("s2c/send_server_models", (client, handler, buf, responseSender) -> {
+    public final S2C S2C_SEND_SERVER_MODELS = new S2C("s2c/send_server_models", (client, handler, buf, responseSender) -> {
         String names = IOManager.theByteBufToString(buf);
         GlTFModelManager manager = GlTFModelManager.getManager();
         String noModel = manager.removeModelAndGetNoModel(names);
-        C2S_GET_SERVER_MODEL.send(IOManager.theStringToByteBuf(noModel));
+        C2S_GET_SERVER_MODEL_DATA.send(IOManager.theStringToByteBuf(noModel));
     });
 
-    public final S2C S2C_GET_PLAYER_MODEL = new S2C("s2c/get_payer_model", (client, handler, buf, responseSender) -> {
-
+    // 知道玩家OK 发生服务器模型目录
+    public final C2S C2S_KEY_OK = new C2S("s2c/key_ok",(server, player, handler, buf, responseSender) -> {
+        String names = GlTFModelManager.getManager().getModelNamesString();
+        S2C_SEND_SERVER_MODELS.send(player, IOManager.theStringToByteBuf(names));
     });
 
+    // 收到key 检查本身缓存 并告诉服务器收到
     public final S2C S2C_SEND_KEY = new S2C("s2c/send_key", (client, handler, buf, responseSender) -> {
-
+        ServerManage.setSeverKey(IOManager.theByteBufToString(buf));
+        byte[] bytes = GlTFModelManager.getManager().rendServerModel();
+        GlTFModelManager.getManager().addServerModels(bytes);
+        MCglTF.getInstance().reloadManager();
+        C2S_KEY_OK.send(IOManager.getFriendlyByteBuf());
     });
 
     // 设置玩家模型
@@ -61,18 +67,19 @@ public class NetworkManager {
     }
 
     public void registerC2S() {
-        C2S_GET_SERVER_MODEL.register();
+        C2S_GET_SERVER_MODEL_DATA.register();
+        C2S_KEY_OK.register();
 
-        // 玩家进入服务器 服务器向客户端发送服务器的模型目录
+        // 玩家进入服务器 向玩家发生服务器的Key
         PacketSenderReadyCallback.registerServer((handler, sender, server) -> {
-            String names = GlTFModelManager.getManager().getModelNamesString();
-            S2C_SEND_S2C_MODELS.send(sender, IOManager.theStringToByteBuf(names));
+            S2C_SEND_KEY.send(sender,IOManager.theStringToByteBuf(ServerManage.getManage().getKey()));
         });
     }
 
     public void registerS2C() {
+        S2C_SEND_SERVER_MODEL_DATA.register();
+        S2C_SEND_SERVER_MODELS.register();
         S2C_SET_PLAYER_MODEL.register();
-        S2C_GET_PLAYER_MODEL.register();
         S2C_SEND_KEY.register();
 
         PacketSenderReadyCallback.registerClient((handler, sender, client) -> {

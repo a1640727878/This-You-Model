@@ -15,6 +15,8 @@ public class DirectoryManager {
 
     public static final Path PLAYER_OPEN_CACHE_DIR = CACHE_DIR.resolve("player_open.cache");
 
-    public static final Path MODEL_CACHE_DIR = CACHE_DIR.resolve("model.cache");
+    public static final Path SERVER_MODEL_CACHE_DIR = CACHE_DIR.resolve("SeverCache");
+
+    public static final Path SERVER_KEY_DIR = CACHE_DIR.resolve(".key");
 
 }

@@ -46,7 +46,7 @@ public class GlTFModelManager {
             }
         }
         glTFParent.clear();
-        GltfModel model = getDefaultModel();
+        GltfModel model = loadDefaultModel();
         default_model = new ModelData("default", model);
         setModels();
     }
@@ -175,11 +175,41 @@ public class GlTFModelManager {
         }
     }
 
-    private GltfModel getDefaultModel() {
+    private GltfModel loadDefaultModel() {
         try (InputStream is = ThisYouModel_Main.class.getClassLoader().getResourceAsStream("default.glb")) {
             return new GltfModelReader().readWithoutReferences(is);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public void addServerModels(byte[] bytes){
+        Map<String, byte[]> server_models = GlTFModelManager.getManager().toBytesFoModels(bytes);
+        for (Map.Entry<String, byte[]> entry : server_models.entrySet()) {
+            GlTFModelManager.getManager().addModelByte(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public byte[] rendServerModel(){
+        Path path = DirectoryManager.SERVER_MODEL_CACHE_DIR.resolve(ServerManage.getSeverKey());
+        try (InputStream is = Files.newInputStream(path)){
+            return is.readAllBytes();
+        } catch (IOException e) {
+            return new byte[0];
+        }
+    }
+
+    public void asyncWriteServerModel(byte[] bytes) {
+        IOManager.SERVICE.execute(() -> writeServerModel(bytes));
+    }
+
+    private void writeServerModel(byte[] bytes) {
+        Path path = DirectoryManager.SERVER_MODEL_CACHE_DIR.resolve(ServerManage.getSeverKey());
+        if (Files.notExists(path)) IOManager.createFile(path);
+        try {
+            Files.write(path, bytes);
+        } catch (IOException ignored) {
+
         }
     }
 

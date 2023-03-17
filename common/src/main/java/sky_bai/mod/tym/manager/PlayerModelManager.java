@@ -65,11 +65,11 @@ public class PlayerModelManager {
     }
 
     public void set(Player player, String model_name) {
-        if (player instanceof ServerPlayer serverPlayer) setServer(player.getStringUUID(),model_name);
+        if (player instanceof ServerPlayer serverPlayer) setServer(player.getStringUUID(), model_name);
     }
 
-    private void setServer(String player_uuid, String model_name){
-        playerModel.put(player_uuid,model_name);
+    private void setServer(String player_uuid, String model_name) {
+        playerModel.put(player_uuid, model_name);
         asyncWriteCache(this::writeCache);
     }
 
@@ -115,15 +115,7 @@ public class PlayerModelManager {
     }
 
     public <K, V> void write(Path path, Map<K, V> map) {
-        if (Files.notExists(path)) {
-            try {
-                if (Files.notExists(DirectoryManager.CACHE_DIR))
-                    Files.createDirectories(DirectoryManager.CACHE_DIR);
-                Files.createFile(path);
-            } catch (IOException ignored) {
-
-            }
-        }
+        if (Files.notExists(path)) IOManager.createFile(path);
         String json = IOManager.GSON.toJson(map);
         try {
             Files.writeString(path, json);

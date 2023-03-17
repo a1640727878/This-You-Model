@@ -5,6 +5,8 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -45,6 +47,15 @@ public class IOManager {
 
     public static String theByteBufToString(FriendlyByteBuf buf) {
         return new String(buf.readByteArray());
+    }
+
+    public static void createFile(Path path) {
+        try {
+            if (Files.notExists(path.getParent())) Files.createDirectories(path.getParent());
+            Files.createFile(path);
+        } catch (IOException ignored) {
+
+        }
     }
 
 }
