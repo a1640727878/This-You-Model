@@ -11,8 +11,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "sky_bai.mod.tym.fabric.ThisYouModel_Fabric",
-      "sky_bai.mod.tym.fabric.lib.MCglTF_Fabric"
+      "sky_bai.mod.tym.fabric.ThisYouModel_Fabric"
+    ],
+    "client": [
+      "sky_bai.mod.tym.fabric.ThisYouModel_Fabric_Client"
     ]
   },
   "mixins": [

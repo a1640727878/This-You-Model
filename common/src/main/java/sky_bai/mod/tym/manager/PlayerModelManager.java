@@ -1,6 +1,7 @@
 package sky_bai.mod.tym.manager;
 
 import com.google.gson.reflect.TypeToken;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
@@ -13,14 +14,14 @@ public class PlayerModelManager {
 
     public static final String YES = "yes";
     public static final String NO = "no";
-    static PlayerModelManager playerModelManager;
+    static PlayerModelManager manager;
     Map<String, String> playerModel = new HashMap<>();
     Map<String, String> playerOpenModel = new HashMap<>();
     Map<String, GlTFModelManager.ModelData> playerModelData = new HashMap<>();
 
     public static PlayerModelManager getManager() {
-        if (playerModelManager == null) playerModelManager = read();
-        return playerModelManager;
+        if (manager == null) manager = read();
+        return manager;
     }
 
     public static PlayerModelManager read() {
@@ -63,12 +64,18 @@ public class PlayerModelManager {
         return str.equals(YES);
     }
 
-    public void set(String player_uuid, String model_name) {
-        playerModel.put(player_uuid, model_name);
-        asyncWriteCache(this::writeCache);
-        setPlayerData(player_uuid, model_name);
+    public void set(Player player, String model_name) {
+        if (player instanceof ServerPlayer serverPlayer) setServer(player.getStringUUID(),model_name);
     }
 
+    private void setServer(String player_uuid, String model_name){
+        playerModel.put(player_uuid,model_name);
+        asyncWriteCache(this::writeCache);
+    }
+
+    public void set(String player_uuid, String model_name) {
+        setPlayerData(player_uuid, model_name);
+    }
 
     private GlTFModelManager.ModelData setPlayerData(String uuid, String model_name) {
         GlTFModelManager.ModelData data = GlTFModelManager.getManager().getModelData(model_name);

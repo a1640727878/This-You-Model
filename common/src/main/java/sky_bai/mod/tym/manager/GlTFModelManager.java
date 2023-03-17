@@ -1,8 +1,5 @@
 package sky_bai.mod.tym.manager;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.player.Player;
 import sky_bai.mod.tym.ThisYouModel_Main;
 import sky_bai.mod.tym.api.PlayerState;
@@ -15,6 +12,7 @@ import sky_bai.mod.tym.lib.mcgltf.RenderedGltfScene;
 import sky_bai.mod.tym.lib.mcgltf.animation.GltfAnimationCreator;
 import sky_bai.mod.tym.lib.mcgltf.animation.InterpolatedChannel;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,18 +22,19 @@ import java.util.*;
 
 public class GlTFModelManager {
 
-    static GlTFModelManager glTFModelManager;
+    static GlTFModelManager manager;
 
     private final Set<ModelData> glTFParent = new HashSet<>();
+    private final Map<String, byte[]> glTFByteBuf = new HashMap<>();
 
     private ModelData default_model;
 
     public static GlTFModelManager getManager() {
-        if (glTFModelManager == null) {
-            glTFModelManager = new GlTFModelManager();
-            glTFModelManager.reload();
+        if (manager == null) {
+            manager = new GlTFModelManager();
+            manager.reload();
         }
-        return glTFModelManager;
+        return manager;
     }
 
     public void reload() {
@@ -47,9 +46,50 @@ public class GlTFModelManager {
             }
         }
         glTFParent.clear();
-        GltfModel model = getModel(new ResourceLocation("gltf", "default.glb"));
+        GltfModel model = getDefaultModel();
         default_model = new ModelData("default", model);
-        setModelPaths();
+        setModels();
+    }
+
+    public String getModelNamesString() {
+        String names = "";
+        for (ModelData data : glTFParent) {
+            names += (data.name + "<->");
+        }
+        return names.length() != 0 ? names.substring(0, names.length() - "<->".length()) : names;
+    }
+
+    private Map<String, byte[]> getServerModels(String names) {
+        Set<String> name_set = Set.of(names.split("<->"));
+        Map<String, byte[]> no_name = new HashMap<>();
+        if (names.length() == 0) return no_name;
+        for (Map.Entry<String, byte[]> entry : glTFByteBuf.entrySet()) {
+            if (name_set.contains(entry.getKey())) no_name.put(entry.getKey(), entry.getValue());
+        }
+        return no_name;
+    }
+
+    public Map<String, byte[]> toBytesFoModels(byte[] bytes) {
+        return IOManager.theBytesToObject(bytes);
+    }
+
+    public String removeModelAndGetNoModel(String names) {
+        if (names.length() == 0) return "";
+        Set<String> name_set = Set.of(names.split("<->"));
+        Set<ModelData> data = new HashSet<>();
+        String noModel = "";
+        for (ModelData d : glTFParent) {
+            if (!name_set.contains(d.name)) continue;
+            data.add(d);
+            noModel += (d.name + "<->");
+        }
+        glTFParent.clear();
+        glTFParent.addAll(data);
+        return noModel.length() != 0 ? noModel.substring(0, names.length() - "<->".length()) : noModel;
+    }
+
+    public byte[] getServerModelsBytes(String names) {
+        return IOManager.theObjectToBytes(getServerModels(names));
     }
 
     public ModelData getDefaultModelData() {
@@ -63,14 +103,6 @@ public class GlTFModelManager {
         return getDefaultModelData();
     }
 
-    public GltfModel getGltfModel(String name) {
-        return getModelData(name).model;
-    }
-
-    public RendererData getRendererData(String name) {
-        return getModelData(name).data;
-    }
-
     public Set<ModelData> getGlTF() {
         return new HashSet<>(glTFParent);
     }
@@ -78,43 +110,75 @@ public class GlTFModelManager {
     private Path isGlTF(File[] files) {
         for (File file : files) {
             String name = file.getName();
-            if ((name.equals("main.gltf") || name.equals("main.glb")) && file.isFile())
-                return file.toPath();
+            if ((name.equals("main.gltf") || name.equals("main.glb")) && file.isFile()) return file.toPath();
         }
         return null;
     }
 
-    private void setModelPaths() {
+    private void setModels() {
         File[] files = DirectoryManager.MODELS_DIR.toFile().listFiles();
         if (files == null) return;
         for (File file : files) {
+            String file_name = file.getName();
             File[] fs;
             if ((fs = file.listFiles()) != null) {
                 Path p = isGlTF(fs);
-                if (p == null) continue;
-                GltfModel gltfModel = getModel(p);
-                if (gltfModel == null) continue;
-                String name = file.getName();
-                glTFParent.add(new ModelData(name, gltfModel));
+                if (p == null) return;
+                setModelPath(p, file_name);
+                setModelByteBuf(p, file_name);
             }
+
         }
     }
 
-    private GltfModel getModel(Path path) {
+    private void setModelPath(Path p, String name) {
+        GltfModel gltfModel = loadModel(p);
+        if (gltfModel == null) return;
+        glTFParent.add(new ModelData(name, gltfModel));
+    }
+
+    public void addModelByte(String name, byte[] model) {
+        GltfModel gltfModel = loadModel(model);
+        if (gltfModel == null) return;
+        glTFParent.add(new ModelData(name, gltfModel));
+    }
+
+    private void setModelByteBuf(Path p, String name) {
+        byte[] bs = toBytes(p);
+        if (bs == null) return;
+        glTFByteBuf.put(name, bs);
+    }
+
+    private byte[] toBytes(Path p) {
+        byte[] bs;
         try {
-            InputStream is = Files.newInputStream(path);
+            bs = Files.readAllBytes(p);
+            return bs;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private GltfModel loadModel(Path path) {
+        try (InputStream is = Files.newInputStream(path)) {
             return new GltfModelReader().readWithoutReferences(is);
         } catch (IOException | IndexOutOfBoundsException e) {
             return null;
         }
     }
 
-    private GltfModel getModel(ResourceLocation location) {
-        try {
-            Resource resource = Minecraft.getInstance().getResourceManager().getResource(location);
-            InputStream is = resource.getInputStream();
+    private GltfModel loadModel(byte[] bytes) {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+            return new GltfModelReader().readWithoutReferences(bis);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private GltfModel getDefaultModel() {
+        try (InputStream is = ThisYouModel_Main.class.getClassLoader().getResourceAsStream("default.glb")) {
             return new GltfModelReader().readWithoutReferences(is);
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException e) {
             return null;
         }
     }

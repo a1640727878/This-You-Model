@@ -1,4 +1,4 @@
-package sky_bai.mod.tym.mixin;
+package sky_bai.mod.tym.mixin.client;
 
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

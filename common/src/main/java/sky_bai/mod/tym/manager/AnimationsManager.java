@@ -8,13 +8,13 @@ import java.util.Map;
 
 public class AnimationsManager {
 
-    private static AnimationsManager animationsManager;
+    private static AnimationsManager manager;
 
     private final Map<Player, PlayerState> player_state_map = new HashMap<>();
 
     public static AnimationsManager getManager() {
-        if (animationsManager == null) animationsManager = new AnimationsManager();
-        return animationsManager;
+        if (manager == null) manager = new AnimationsManager();
+        return manager;
     }
 
     public PlayerState refreshPlayerState(Player player, float partialTick) {

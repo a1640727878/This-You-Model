@@ -24,7 +24,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 
-public abstract class MCglTF {
+public class MCglTF {
 
     public static final String RESOURCE_LOCATION = "resourceLocation";
     public static final Logger logger = LogManager.getLogger("McGlTF");
@@ -67,11 +67,8 @@ public abstract class MCglTF {
     }
 
     public static MCglTF getInstance() {
+        if (INSTANCE == null) INSTANCE = new MCglTF();
         return INSTANCE;
-    }
-
-    public static void setINSTANCE(MCglTF instance) {
-        INSTANCE = instance;
     }
 
     public static void lookup(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, GlTFModelManager.ModelData data) {
@@ -258,6 +255,35 @@ public abstract class MCglTF {
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, currentTexture);
         });
+    }
+
+    public void reloadManager() {
+        List<Runnable> gltfRenderData = getGltfRenderData();
+        gltfRenderData.forEach(Runnable::run);
+        gltfRenderData.clear();
+
+        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
+        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
+        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 4);
+
+        int currentTexture1 = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+
+        Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup = new HashMap<>();
+
+        GlTFModelManager.getManager().getGlTF().forEach(data -> MCglTF.lookup(lookup, data));
+        MCglTF.lookup(lookup, GlTFModelManager.getManager().getDefaultModelData());
+
+        processRenderedGltfModels(lookup);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GL30.glBindVertexArray(0);
+
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, currentTexture1);
+
+        getLoadedBufferResources().clear();
+        getLoadedImageResources().clear();
     }
 
 }
