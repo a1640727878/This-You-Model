@@ -3,6 +3,7 @@ package sky_bai.mod.tym.manager;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import sky_bai.mod.tym.manager.data.ModelData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +18,7 @@ public class PlayerModelManager {
     static PlayerModelManager manager;
     Map<String, String> playerModel = new HashMap<>();
     Map<String, String> playerOpenModel = new HashMap<>();
-    Map<String, GlTFModelManager.ModelData> playerModelData = new HashMap<>();
+    Map<String, ModelData> playerModelData = new HashMap<>();
 
     public static PlayerModelManager getManager() {
         if (manager == null) manager = read();
@@ -65,7 +66,7 @@ public class PlayerModelManager {
     }
 
     public void set(Player player, String model_name) {
-        if (player instanceof ServerPlayer serverPlayer) setServer(player.getStringUUID(), model_name);
+        if (player instanceof ServerPlayer) setServer(player.getStringUUID(), model_name);
     }
 
     private void setServer(String player_uuid, String model_name) {
@@ -77,15 +78,15 @@ public class PlayerModelManager {
         setPlayerData(player_uuid, model_name);
     }
 
-    private GlTFModelManager.ModelData setPlayerData(String uuid, String model_name) {
-        GlTFModelManager.ModelData data = GlTFModelManager.getManager().getModelData(model_name);
+    private ModelData setPlayerData(String uuid, String model_name) {
+        ModelData data = GlTFModelManager.getManager().getModel(model_name);
         playerModelData.put(uuid, data);
         return data;
     }
 
-    public GlTFModelManager.ModelData get(Player player) {
+    public ModelData get(Player player) {
         String uuid = player.getStringUUID();
-        GlTFModelManager.ModelData data = playerModelData.get(uuid);
+        ModelData data = playerModelData.get(uuid);
         if (data == null) {
             String model_name = getModelName(uuid);
             data = setPlayerData(uuid, model_name);

@@ -4,8 +4,8 @@
   "package": "sky_bai.mod.tym.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "client.MixinEntityRenderers",
-    "client.MixinClientPacketListener"
+    "client.MixinClientPacketListener",
+    "client.MixinEntityRenderers"
   ],
   "mixins": [
     "MixinCommands",

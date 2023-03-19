@@ -11,10 +11,8 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import sky_bai.mod.tym.manager.GlTFModelManager;
-import sky_bai.mod.tym.manager.IOManager;
-import sky_bai.mod.tym.manager.NetworkManager;
-import sky_bai.mod.tym.manager.PlayerModelManager;
+import sky_bai.mod.tym.manager.*;
+import sky_bai.mod.tym.manager.data.ModelData;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,11 +23,19 @@ public class TYM_Command {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("tym");
+
+        LiteralArgumentBuilder<CommandSourceStack> reload = Commands.literal("reload").executes(context -> {
+            FileModelManager.getManager().reload();
+            sendPayerReloadModel(context.getSource().getServer());
+            dispatcher.register(command);
+            return 0;
+        });
+
+        command.then(reload);
+
         LiteralArgumentBuilder<CommandSourceStack> player_command = Commands.literal("player").requires(arg -> arg.hasPermission(2));
-        Set<GlTFModelManager.ModelData> data = GlTFModelManager.getManager().getGlTF();
-        List<String> modelName = new ArrayList<>(data.size());
-        data.forEach(d -> modelName.add(d.name));
-        modelName.add(GlTFModelManager.getManager().getDefaultModelData().name);
+        List<String> modelName = new ArrayList<>(FileModelManager.getManager().getFileModelNames());
+        modelName.add(GlTFModelManager.getManager().getDefaultModel().getName());
 
         thenPlayer(player_command, modelName);
 
@@ -70,7 +76,7 @@ public class TYM_Command {
             set_model.then(Commands.literal(name).executes((context) -> {
                 Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "player");
                 for (ServerPlayer player : players) PlayerModelManager.getManager().set(player, name);
-                sendPlayerSetModel(context.getSource().getServer(),name);
+                sendPlayerSetModel(context.getSource().getServer(), name);
                 return 0;
             }));
         }
@@ -93,7 +99,7 @@ public class TYM_Command {
                 CommandSourceStack stack = context.getSource();
                 if (stack.getEntity() instanceof Player player) {
                     PlayerModelManager.getManager().set(player, name);
-                    sendPlayerSetModel(context.getSource().getServer(),name);
+                    sendPlayerSetModel(context.getSource().getServer(), name);
                 }
                 return 0;
             }));
@@ -107,10 +113,16 @@ public class TYM_Command {
         command.then(open_model);
     }
 
-    private static void sendPlayerSetModel(MinecraftServer server,String model_name){
+    private static void sendPlayerSetModel(MinecraftServer server, String model_name) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             NetworkManager.getManager().S2C_SET_PLAYER_MODEL.send(player,
                     IOManager.theStringToByteBuf(player.getStringUUID() + "<->" + model_name));
+        }
+    }
+
+    private static void sendPayerReloadModel(MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            NetworkManager.getManager().S2C_SEND_KEY.send(player, IOManager.theStringToByteBuf(ServerManage.getManage().getKey()));
         }
     }
 

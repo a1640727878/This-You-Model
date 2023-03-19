@@ -5,21 +5,18 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.*;
 import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
 import sky_bai.mod.tym.lib.jgltf.model.io.Buffers;
 import sky_bai.mod.tym.manager.GlTFModelManager;
+import sky_bai.mod.tym.manager.data.ModelData;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -69,17 +66,6 @@ public class MCglTF {
     public static MCglTF getInstance() {
         if (INSTANCE == null) INSTANCE = new MCglTF();
         return INSTANCE;
-    }
-
-    public static void lookup(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, GlTFModelManager.ModelData data) {
-        String name = data.name;
-        GltfModel model = data.model;
-        MutablePair<GltfModel, List<GlTFModelManager.ModelData>> pair = lookup.get(name);
-        if (pair == null) {
-            pair = MutablePair.of(model, new ArrayList<>());
-            lookup.put(name, pair);
-        }
-        pair.getRight().add(data);
     }
 
     public int getGlProgramSkinning() {
@@ -192,35 +178,20 @@ public class MCglTF {
         GL20.glLinkProgram(glProgramSkinning);
     }
 
-    private void processRenderedGltfModels(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup, BiFunction<List<Runnable>, GltfModel, RenderedGltfModel> renderedGltfModelBuilder) {
-        lookup.forEach((modelLocation, receivers) -> {
-            List<GlTFModelManager.ModelData> list = receivers.getRight();
-            for (GlTFModelManager.ModelData data : list) {
-                if (data.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
-                    RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
-                    data.getData().onReceiveSharedModel(renderedModel);
-                }
+    private void processRenderedGltfModels(Set<ModelData> lookup, BiFunction<List<Runnable>, GltfModel, RenderedGltfModel> renderedGltfModelBuilder) {
+        lookup.forEach(data -> {
+            if (data.getModelRenderer().isReceiveSharedModel(data.getModel(), gltfRenderData)) {
+                RenderedGltfModel rendered = renderedGltfModelBuilder.apply(gltfRenderData, data.getModel());
+                data.getModelRenderer().initialize(rendered);
             }
-
-            /**Iterator<GlTFModelManager.ModelData> iterator = receivers.getRight().iterator();
-             do {
-             GlTFModelManager.ModelData receiver = iterator.next();
-             if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
-             RenderedGltfModel renderedModel = renderedGltfModelBuilder.apply(gltfRenderData, receivers.getLeft());
-             receiver.getData().onReceiveSharedModel(renderedModel);
-             while (iterator.hasNext()) {
-             receiver = iterator.next();
-             if (receiver.getData().isReceiveSharedModel(receivers.getLeft(), gltfRenderData)) {
-             receiver.getData().onReceiveSharedModel(renderedModel);
-             }
-             }
-             return;
-             }
-             } while (iterator.hasNext());*/
+            if (data.getArmModelRenderer().isReceiveSharedModel(data.getArmModel(), gltfRenderData)) {
+                RenderedGltfModel rendered = renderedGltfModelBuilder.apply(gltfRenderData, data.getArmModel());
+                data.getArmModelRenderer().initialize(rendered);
+            }
         });
     }
 
-    public void processRenderedGltfModels(Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup) {
+    public void processRenderedGltfModels(Set<ModelData> lookup) {
         processRenderedGltfModels(lookup, RenderedGltfModel::new);
         GL15.glBindBuffer(GL30.GL_TRANSFORM_FEEDBACK_BUFFER, 0);
         GL15.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, 0);
@@ -257,7 +228,8 @@ public class MCglTF {
         });
     }
 
-    public void reloadManager() {
+
+    public void reloadALLModel() {
         List<Runnable> gltfRenderData = getGltfRenderData();
         gltfRenderData.forEach(Runnable::run);
         gltfRenderData.clear();
@@ -269,10 +241,9 @@ public class MCglTF {
 
         int currentTexture1 = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 
-        Map<String, MutablePair<GltfModel, List<GlTFModelManager.ModelData>>> lookup = new HashMap<>();
+        Set<ModelData> lookup = new HashSet<>(GlTFModelManager.getManager().getGlTFParent());
 
-        GlTFModelManager.getManager().getGlTF().forEach(data -> MCglTF.lookup(lookup, data));
-        MCglTF.lookup(lookup, GlTFModelManager.getManager().getDefaultModelData());
+        lookup.add(GlTFModelManager.getManager().getDefaultModel());
 
         processRenderedGltfModels(lookup);
 
@@ -284,6 +255,7 @@ public class MCglTF {
 
         getLoadedBufferResources().clear();
         getLoadedImageResources().clear();
+
     }
 
 }

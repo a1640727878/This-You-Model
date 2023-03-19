@@ -24,7 +24,7 @@ public class ThisYouModel_Fabric_Client implements ClientModInitializer {
 
             @Override
             public void onResourceManagerReload(ResourceManager resourceManager) {
-                MCglTF.getInstance().reloadManager();
+                MCglTF.getInstance().reloadALLModel();
             }
         });
     }

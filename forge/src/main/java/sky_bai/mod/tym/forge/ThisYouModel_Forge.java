@@ -7,7 +7,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import sky_bai.mod.tym.ThisYouModel_Main;
 import sky_bai.mod.tym.lib.mcgltf.MCglTF;
 import sky_bai.mod.tym.network.PlayerModelNetwork;
@@ -26,7 +25,7 @@ public class ThisYouModel_Forge {
             MCglTF.getInstance().initializeGL();
 
             event.registerReloadListener((ResourceManagerReloadListener) manager -> {
-                MCglTF.getInstance().reloadManager();
+                MCglTF.getInstance().reloadALLModel();
             });
         }
 

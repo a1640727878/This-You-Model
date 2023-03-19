@@ -22,9 +22,8 @@ public class IOManager {
             oos.flush();
             return bos.toByteArray();
         } catch (IOException ignored) {
-
+            return new byte[0];
         }
-        return new byte[0];
     }
 
     public static <T> T theBytesToObject(byte[] bytes) {
@@ -35,6 +34,14 @@ public class IOManager {
 
         }
         return null;
+    }
+
+    public static byte[] theFileToBytes(File file) {
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException e) {
+            return new byte[0];
+        }
     }
 
     public static FriendlyByteBuf getFriendlyByteBuf() {
@@ -57,5 +64,6 @@ public class IOManager {
 
         }
     }
+
 
 }

@@ -19,4 +19,8 @@ public class DirectoryManager {
 
     public static final Path SERVER_KEY_DIR = CACHE_DIR.resolve(".key");
 
+    public static Path getServerFileModelCacheDie() {
+        return SERVER_MODEL_CACHE_DIR.resolve(ServerManage.getSeverKey());
+    }
+
 }

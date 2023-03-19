@@ -7,10 +7,8 @@ import java.util.UUID;
 public class ServerManage {
 
     private static ServerManage manage;
-
-    private String key;
-
     private static String sever_key;
+    private String key;
 
     private ServerManage() {
         initialize();
