@@ -11,7 +11,6 @@ import sky_bai.mod.tym.lib.badpackets.api.event.PacketSenderReadyCallback;
 import sky_bai.mod.tym.lib.badpackets.impl.Constants;
 import sky_bai.mod.tym.lib.badpackets.impl.handler.ClientPacketHandler;
 import sky_bai.mod.tym.lib.badpackets.impl.handler.ServerPacketHandler;
-import sky_bai.mod.tym.lib.mcgltf.MCglTF;
 
 public class NetworkManager {
     static NetworkManager manager;

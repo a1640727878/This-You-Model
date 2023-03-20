@@ -4105,7 +4105,7 @@ public class RenderedGltfModel {
 
         public void initMaterialCommand(List<Runnable> gltfRenderData, RenderedGltfModel renderedModel) {
             List<TextureModel> textureModels = renderedModel.gltfModel.getTextureModels();
-            int colorMap = baseColorTexture == null ? MCglTF.getInstance().getDefaultColorMap() : renderedModel.obtainGlTexture(gltfRenderData, textureModels.get(baseColorTexture.index));
+            int colorMap = baseColorTexture == null ? MCglTF.getInstance().getDefaultColorMap() : renderedModel.obtainGlTexture(gltfRenderData, textureModels.get(Math.max(baseColorTexture.index, 0)));
             int normalMap = normalTexture == null ? MCglTF.getInstance().getDefaultNormalMap() : renderedModel.obtainGlTexture(gltfRenderData, textureModels.get(normalTexture.index));
             int specularMap = specularTexture == null ? MCglTF.getInstance().getDefaultSpecularMap() : renderedModel.obtainGlTexture(gltfRenderData, textureModels.get(specularTexture.index));
             if (doubleSided) {

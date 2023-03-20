@@ -1,13 +1,10 @@
 package sky_bai.mod.tym.manager.data;
 
-import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
-import sky_bai.mod.tym.lib.jgltf.model.ImageModel;
-import sky_bai.mod.tym.lib.jgltf.model.NodeModel;
-import sky_bai.mod.tym.lib.jgltf.model.impl.DefaultGltfModel;
-import sky_bai.mod.tym.lib.jgltf.model.impl.DefaultImageModel;
-import sky_bai.mod.tym.lib.jgltf.model.impl.DefaultNodeModel;
+import sky_bai.mod.tym.lib.jgltf.model.*;
+import sky_bai.mod.tym.lib.jgltf.model.impl.*;
 import sky_bai.mod.tym.lib.jgltf.model.io.Buffers;
 import sky_bai.mod.tym.lib.jgltf.model.io.GltfModelReader;
+import sky_bai.mod.tym.manager.json.JsonAnimations;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,8 +16,11 @@ public class ModelData {
     private GltfModel model;
     private ModelRendererData model_renderer = new ModelRendererData();
 
-    private GltfModel arm_model;
-    private ModelRendererData arm_model_renderer = new ModelRendererData();
+    private GltfModel arm_model_left;
+    private ModelRendererData arm_model_left_renderer = new ModelRendererData();
+
+    private GltfModel arm_model_right;
+    private ModelRendererData arm_model_right_renderer = new ModelRendererData();
 
     private Map<String, ImageModel> images = new HashMap<>();
 
@@ -28,9 +28,10 @@ public class ModelData {
 
     }
 
-    public static ModelData getDefaultData(GltfModel model, GltfModel model_copy) {
+    public static ModelData getDefaultData(GltfModel model, GltfModel model_copy_left, GltfModel model_copy_right) {
         ModelData modelData = new ModelData();
-        setModel(modelData, "default", model, extractArmModel(model_copy), new HashMap<>());
+        GltfModel[] gs = extractArmModel(model_copy_left, model_copy_right);
+        setModel(modelData, "default", model, gs[0], gs[1], new HashMap<>());
         return modelData;
     }
 
@@ -38,17 +39,31 @@ public class ModelData {
         ModelData modelData = new ModelData();
         GltfModel model = bytesToGltfModel(data.getModel());
         if (model == null) return null;
-        GltfModel arm_model;
-        if (data.getArmModel() != null) arm_model = bytesToGltfModel(data.getArmModel());
-        else arm_model = extractArmModel(Objects.requireNonNull(bytesToGltfModel(data.getModel())));
-        setModel(modelData, data.getName(), model, arm_model, data.getImages());
+        GltfModel arm_model_left;
+        GltfModel arm_model_right;
+        if (data.getArmModel() != null) {
+            GltfModel[] gs = extractArmModel(
+                    Objects.requireNonNull(bytesToGltfModel(data.getArmModel())),
+                    Objects.requireNonNull(bytesToGltfModel(data.getArmModel())));
+            arm_model_left = gs[0];
+            arm_model_right = gs[1];
+        } else {
+            GltfModel[] gs = extractArmModel(
+                    Objects.requireNonNull(bytesToGltfModel(data.getModel())),
+                    Objects.requireNonNull(bytesToGltfModel(data.getModel())));
+            arm_model_left = gs[0];
+            arm_model_right = gs[1];
+        }
+        setModel(modelData, data.getName(), model, arm_model_left, arm_model_right, data.getImages());
+        JsonAnimations JSON = data.toJsonAnimations();
         return modelData;
     }
 
-    private static void setModel(ModelData data, String name, GltfModel model, GltfModel arm_model, Map<String, byte[]> images) {
+    private static void setModel(ModelData data, String name, GltfModel model, GltfModel arm_model_left, GltfModel arm_model_right, Map<String, byte[]> images) {
         data.name = name;
         data.model = model;
-        data.arm_model = arm_model;
+        data.arm_model_left = arm_model_left;
+        data.arm_model_right = arm_model_right;
         Map<String, ImageModel> images_map = new HashMap<>();
         for (Map.Entry<String, byte[]> entry : images.entrySet()) {
             setImage(images_map, entry);
@@ -74,27 +89,70 @@ public class ModelData {
         }
     }
 
-    private static GltfModel extractArmModel(GltfModel model) {
-        Set<NodeModel> nodes_ext = new HashSet<>();
-        List<NodeModel> nodes = model.getNodeModels();
-        for (NodeModel node : nodes) {
+    private static GltfModel[] extractArmModel(GltfModel left, GltfModel right) {
+        Set<NodeModel> nodes_ext_left = new HashSet<>();
+        Set<NodeModel> nodes_ext_right = new HashSet<>();
+        List<NodeModel> nodes_left = left.getNodeModels();
+        NodeModel left_hand = null;
+        NodeModel right_hand = null;
+        for (NodeModel node : nodes_left) {
             String name = node.getName();
             if (name == null) continue;
             switch (name) {
-                case "LeftHand", "RightHand" -> {
-                    nodes_ext.add(node);
+                case "LeftHand" -> {
+                    left_hand = node;
+                    nodes_ext_left.add(node);
                     List<NodeModel> children = node.getChildren();
-                    addNode(nodes_ext, children);
+                    addNode(nodes_ext_left, children);
+                }
+                case "RightHand" -> {
+                    right_hand = node;
+                    nodes_ext_right.add(node);
+                    List<NodeModel> children = node.getChildren();
+                    addNode(nodes_ext_right, children);
                 }
             }
         }
-        List<DefaultNodeModel> node_new = new ArrayList<>();
-        for (NodeModel node : nodes) {
-            if (nodes_ext.contains(node)) node_new.add((DefaultNodeModel) node);
+        List<DefaultNodeModel> node_new_left = new ArrayList<>();
+        List<DefaultNodeModel> node_new_right = new ArrayList<>();
+        for (NodeModel node : nodes_left) {
+            if (nodes_ext_left.contains(node)) node_new_left.add((DefaultNodeModel) node);
+            if (nodes_ext_right.contains(node)) node_new_right.add((DefaultNodeModel) node);
         }
-        ((DefaultGltfModel) model).clearNodeModels();
-        ((DefaultGltfModel) model).addNodeModels(node_new);
-        return model;
+
+        ((DefaultGltfModel) left).clearNodeModels();
+        ((DefaultGltfModel) left).addNodeModels(node_new_left);
+        setSceneNode(left, left_hand);
+        extractAnimations(left, true);
+        ((DefaultGltfModel) right).clearNodeModels();
+        ((DefaultGltfModel) right).addNodeModels(node_new_right);
+        setSceneNode(right, right_hand);
+        extractAnimations(right, false);
+        return new GltfModel[]{left, right};
+    }
+
+    private static void setSceneNode(GltfModel model, NodeModel node) {
+        for (SceneModel scene : model.getSceneModels()) {
+            DefaultSceneModel d_scene = (DefaultSceneModel) scene;
+            d_scene.clearNodeModels();
+            if (node != null) {
+                ((DefaultNodeModel) node).setParent(null);
+                d_scene.addNode(node);
+            }
+        }
+    }
+
+    private static void extractAnimations(GltfModel model, boolean isLeft) {
+        DefaultGltfModel d_model = (DefaultGltfModel) model;
+        List<AnimationModel> animations = model.getAnimationModels();
+        List<DefaultAnimationModel> animations_new = new ArrayList<>();
+        for (AnimationModel animation : animations) {
+            String name = animation.getName();
+            if (name.equals("use_lefthand") && isLeft) animations_new.add((DefaultAnimationModel) animation);
+            else if (name.equals("use_righthand") && !isLeft) animations_new.add((DefaultAnimationModel) animation);
+        }
+        d_model.clearAnimationModels();
+        d_model.addAnimationModels(animations_new);
     }
 
     private static void addNode(Set<NodeModel> set, List<NodeModel> children) {
@@ -117,12 +175,20 @@ public class ModelData {
         return model_renderer;
     }
 
-    public GltfModel getArmModel() {
-        return arm_model;
+    public GltfModel getArmModelLeft() {
+        return arm_model_left;
     }
 
-    public ModelRendererData getArmModelRenderer() {
-        return arm_model_renderer;
+    public GltfModel getArmModelRight() {
+        return arm_model_right;
+    }
+
+    public ModelRendererData getArmModelLeftRenderer() {
+        return arm_model_left_renderer;
+    }
+
+    public ModelRendererData getArmModelRightRenderer() {
+        return arm_model_right_renderer;
     }
 
     public Map<String, ImageModel> getImages() {

@@ -1,5 +1,7 @@
 package sky_bai.mod.tym.lib.mcgltf.animation;
 
+import net.minecraft.world.entity.player.Player;
+
 import java.util.Arrays;
 
 public abstract class InterpolatedChannel {
@@ -8,6 +10,10 @@ public abstract class InterpolatedChannel {
      * The key frame times, in seconds
      */
     protected final float[] timesS;
+
+    private Player player;
+
+    private float weight = 1;
 
     public InterpolatedChannel(float[] timesS) {
         this.timesS = timesS;
@@ -38,5 +44,21 @@ public abstract class InterpolatedChannel {
     public abstract void update(float timeS);
 
     protected abstract float[] getListener();
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
+    }
+
+    public float getWeight() {
+        return weight;
+    }
 
 }

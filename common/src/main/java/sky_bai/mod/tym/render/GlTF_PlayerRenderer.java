@@ -41,5 +41,28 @@ public class GlTF_PlayerRenderer extends PlayerRenderer {
         return PlayerModelManager.getManager().get(entity).getModelRenderer();
     }
 
+    public ModelRendererData getArmData(AbstractClientPlayer player, boolean isLeft) {
+        if (isLeft) return PlayerModelManager.getManager().get(player).getArmModelLeftRenderer();
+        else return PlayerModelManager.getManager().get(player).getArmModelRightRenderer();
+    }
 
+    @Override
+    public void renderLeftHand(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, AbstractClientPlayer player) {
+        if (PlayerModelManager.getManager().isOpen(player)) {
+            getArmData(player, true).renderModel(player, 0, 0, matrixStack, combinedLight, 0, 0);
+            // getArmData(player, true).renderItem(player, 0, 0, matrixStack, buffer, combinedLight, 0, 0);
+        } else {
+            super.renderLeftHand(matrixStack, buffer, combinedLight, player);
+        }
+    }
+
+    @Override
+    public void renderRightHand(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, AbstractClientPlayer player) {
+        if (PlayerModelManager.getManager().isOpen(player)) {
+            getArmData(player, false).renderModel(player, 0, 0, matrixStack, combinedLight, 0, 0);
+            // getArmData(player, false).renderItem(player, 0, 0, matrixStack, buffer, combinedLight, 0, 0);
+        } else {
+            super.renderRightHand(matrixStack, buffer, combinedLight, player);
+        }
+    }
 }

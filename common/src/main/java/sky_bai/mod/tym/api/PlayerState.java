@@ -1,6 +1,7 @@
 package sky_bai.mod.tym.api;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
@@ -28,8 +29,20 @@ public class PlayerState {
     public PlayerState(Player player) {
         this.player = player;
         reload(0);
-        registerALL();
     }
+
+    public static PlayerState getStateGlobal(Player player){
+        PlayerState state = new PlayerState(player);
+        state.registerALL();
+        return state;
+    }
+
+    public static PlayerState getStateUse(Player player){
+        PlayerState state = new PlayerState(player);
+        state.registerUseALL();
+        return state;
+    }
+
 
     public static void registerGet(String name, GetState get) {
         MAIN_ANIM_NAME_G.add(new StateDataG(name, get));
@@ -51,7 +64,7 @@ public class PlayerState {
         }
     }
 
-    public String[] getMainAnimName() {
+    public String[] getAnimName() {
         for (StateDataG g : MAIN_ANIM_NAME_G) {
             String key = g.get(player, this);
             if (!Objects.equals(key, NULL)) return new String[]{key, g.name};
@@ -60,6 +73,11 @@ public class PlayerState {
             if (i.is(player, this)) return new String[]{i.name};
         }
         return new String[]{IDLE};
+    }
+
+    private void registerUseALL(){
+        registerIs("use_lefthand", ((p, state) -> !p.isSleeping() && p.swinging && p.swingingArm == InteractionHand.OFF_HAND));
+        registerIs("use_righthand", ((p, state) -> !p.isSleeping() && p.swinging && p.swingingArm == InteractionHand.MAIN_HAND));
     }
 
     private void registerALL() {
@@ -94,11 +112,15 @@ public class PlayerState {
             Pose pose = p.getPose();
             if (limbSwingAmount > 0.15d) {
                 if (pose == Pose.CROUCHING) return "sneak";
-                else if (p.isSprinting()) return "rua";
+                else if (p.isSprinting()) return "run";
                 else return "walk";
             } else if (pose == Pose.CROUCHING) return "sneaking";
             return NULL;
         });
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public interface IsState {

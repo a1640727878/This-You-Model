@@ -38,7 +38,7 @@ public class GlTFModelManager {
             } catch (IOException ignored) {
             }
         }
-        default_model = ModelData.getDefaultData(loadDefaultModel(), loadDefaultModel());
+        default_model = ModelData.getDefaultData(loadDefaultModel(), loadDefaultModel(),loadDefaultModel());
     }
 
     private GltfModel loadDefaultModel() {
@@ -50,6 +50,7 @@ public class GlTFModelManager {
     }
 
     public void loadServerModels() {
+        glTFParent.clear();
         loadModels(FileModelManager.getTheFileModelServerDataMap());
     }
 

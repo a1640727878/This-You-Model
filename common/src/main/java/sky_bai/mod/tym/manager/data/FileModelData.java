@@ -1,5 +1,8 @@
 package sky_bai.mod.tym.manager.data;
 
+import sky_bai.mod.tym.manager.IOManager;
+import sky_bai.mod.tym.manager.json.JsonAnimations;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +13,7 @@ public class FileModelData implements Serializable {
     private byte[] arm_model;
 
     private Map<String, byte[]> images = new HashMap<>();
-    private byte[] amin_json;
+    private String amin_json;
 
     public FileModelData(String name, byte[] model, byte[] arm_model) {
         this.name = name;
@@ -22,11 +25,15 @@ public class FileModelData implements Serializable {
         this(name, model, null);
     }
 
-    public byte[] getAminJson() {
+    public String getAminJson() {
         return amin_json;
     }
 
-    public void setAminJson(byte[] amin_json) {
+    public JsonAnimations toJsonAnimations() {
+        return IOManager.GSON.fromJson(amin_json, JsonAnimations.class);
+    }
+
+    public void setAminJson(String amin_json) {
         this.amin_json = amin_json;
     }
 

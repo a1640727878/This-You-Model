@@ -12,6 +12,7 @@ import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
 import sky_bai.mod.tym.lib.jgltf.model.io.Buffers;
 import sky_bai.mod.tym.manager.GlTFModelManager;
 import sky_bai.mod.tym.manager.data.ModelData;
+import sky_bai.mod.tym.manager.data.ModelRendererData;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -178,21 +179,19 @@ public class MCglTF {
         GL20.glLinkProgram(glProgramSkinning);
     }
 
-    private void processRenderedGltfModels(Set<ModelData> lookup, BiFunction<List<Runnable>, GltfModel, RenderedGltfModel> renderedGltfModelBuilder) {
-        lookup.forEach(data -> {
-            if (data.getModelRenderer().isReceiveSharedModel(data.getModel(), gltfRenderData)) {
-                RenderedGltfModel rendered = renderedGltfModelBuilder.apply(gltfRenderData, data.getModel());
-                data.getModelRenderer().initialize(rendered);
-            }
-            if (data.getArmModelRenderer().isReceiveSharedModel(data.getArmModel(), gltfRenderData)) {
-                RenderedGltfModel rendered = renderedGltfModelBuilder.apply(gltfRenderData, data.getArmModel());
-                data.getArmModelRenderer().initialize(rendered);
-            }
-        });
+    private void initializeModelRenderer(GltfModel model, ModelRendererData renderer) {
+        if (renderer.isReceiveSharedModel(model, gltfRenderData)) {
+            RenderedGltfModel rendered = new RenderedGltfModel(gltfRenderData,model);
+            renderer.initialize(rendered);
+        }
     }
 
     public void processRenderedGltfModels(Set<ModelData> lookup) {
-        processRenderedGltfModels(lookup, RenderedGltfModel::new);
+        lookup.forEach(data -> {
+            initializeModelRenderer(data.getModel(), data.getModelRenderer());
+            initializeModelRenderer(data.getArmModelLeft(), data.getArmModelLeftRenderer());
+            initializeModelRenderer(data.getArmModelRight(), data.getArmModelRightRenderer());
+        });
         GL15.glBindBuffer(GL30.GL_TRANSFORM_FEEDBACK_BUFFER, 0);
         GL15.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, 0);
         GL40.glBindTransformFeedback(GL40.GL_TRANSFORM_FEEDBACK, 0);
@@ -242,7 +241,6 @@ public class MCglTF {
         int currentTexture1 = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 
         Set<ModelData> lookup = new HashSet<>(GlTFModelManager.getManager().getGlTFParent());
-
         lookup.add(GlTFModelManager.getManager().getDefaultModel());
 
         processRenderedGltfModels(lookup);

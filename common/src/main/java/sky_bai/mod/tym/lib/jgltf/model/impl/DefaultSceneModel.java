@@ -64,4 +64,13 @@ public class DefaultSceneModel extends AbstractNamedModelElement
         return Collections.unmodifiableList(nodeModels);
     }
 
+    public void clearNodeModels(){
+        nodeModels.clear();
+    }
+
+    public void setNode(NodeModel node) {
+        nodeModels.clear();
+        nodeModels.add(node);
+    }
+
 }

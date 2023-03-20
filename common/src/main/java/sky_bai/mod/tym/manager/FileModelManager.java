@@ -43,6 +43,10 @@ public class FileModelManager {
         return IOManager.theObjectToBytes(generateByteModelMap(names));
     }
 
+    public byte[] generateAllModelBytes() {
+        return IOManager.theObjectToBytes(generateByteModelMap());
+    }
+
     public String generateServerFileNames() {
         String names = "";
         for (Map.Entry<String, FileModelData> entry : theFileModelDataMap.entrySet()) {
@@ -112,14 +116,6 @@ public class FileModelManager {
         return noModel;
     }
 
-    private Map<String, byte[]> generateServerByteModelMap() {
-        Map<String, byte[]> byte_model_map = new HashMap<>();
-        for (Map.Entry<String, FileModelData> entry : theFileModelServerDataMap.entrySet()) {
-            byte_model_map.put(entry.getKey(), getFileModelDataBytes(entry.getValue()));
-        }
-        return byte_model_map;
-    }
-
     private Map<String, byte[]> generateByteModelMap(String names) {
         if (names.length() == 0) return new HashMap<>();
         Set<String> name_set = Set.of(names.split("<->"));
@@ -127,6 +123,22 @@ public class FileModelManager {
         for (Map.Entry<String, FileModelData> entry : theFileModelDataMap.entrySet()) {
             if (name_set.contains(entry.getKey()))
                 byte_model_map.put(entry.getKey(), getFileModelDataBytes(entry.getValue()));
+        }
+        return byte_model_map;
+    }
+
+    private Map<String, byte[]> generateByteModelMap() {
+        Map<String, byte[]> byte_model_map = new HashMap<>();
+        for (Map.Entry<String, FileModelData> entry : theFileModelDataMap.entrySet()) {
+            byte_model_map.put(entry.getKey(), getFileModelDataBytes(entry.getValue()));
+        }
+        return byte_model_map;
+    }
+
+    private Map<String, byte[]> generateServerByteModelMap() {
+        Map<String, byte[]> byte_model_map = new HashMap<>();
+        for (Map.Entry<String, FileModelData> entry : theFileModelServerDataMap.entrySet()) {
+            byte_model_map.put(entry.getKey(), getFileModelDataBytes(entry.getValue()));
         }
         return byte_model_map;
     }
@@ -153,16 +165,16 @@ public class FileModelManager {
         byte[] model = null;
         byte[] arm_model = null;
         Map<String, byte[]> images = new HashMap<>();
-        byte[] amin_json = null;
+        String amin_json = "";
         for (File f : files) {
             String file_name = f.getName();
             switch (file_name) {
                 case "main.gltf", "main.gld" -> model = IOManager.theFileToBytes(f);
-                case "arm.gltf", "arm.gld" -> arm_model = IOManager.theFileToBytes(file);
-                case "main.animation.json" -> amin_json = IOManager.theFileToBytes(file);
+                case "arm.gltf", "arm.gld" -> arm_model = IOManager.theFileToBytes(f);
+                case "main.animation.json" -> amin_json = IOManager.readJsonString(f);
                 default -> {
                     if (file_name.endsWith(".png") || file_name.endsWith(".jpg"))
-                        images.put(file_name, IOManager.theFileToBytes(file));
+                        images.put(file_name, IOManager.theFileToBytes(f));
                 }
             }
         }

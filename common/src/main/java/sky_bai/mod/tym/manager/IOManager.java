@@ -44,6 +44,14 @@ public class IOManager {
         }
     }
 
+    public static String readJsonString(File file){
+        try {
+            return Files.readString(file.toPath());
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
     public static FriendlyByteBuf getFriendlyByteBuf() {
         return new FriendlyByteBuf(Unpooled.buffer());
     }

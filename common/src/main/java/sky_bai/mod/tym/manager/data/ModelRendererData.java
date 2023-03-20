@@ -30,7 +30,7 @@ import sky_bai.mod.tym.lib.mcgltf.RenderedGltfModel;
 import sky_bai.mod.tym.lib.mcgltf.RenderedGltfScene;
 import sky_bai.mod.tym.lib.mcgltf.animation.GltfAnimationCreator;
 import sky_bai.mod.tym.lib.mcgltf.animation.InterpolatedChannel;
-import sky_bai.mod.tym.manager.AnimationsManager;
+import sky_bai.mod.tym.manager.PlayAnimationManager;
 
 import java.util.*;
 
@@ -40,6 +40,9 @@ public class ModelRendererData {
     private RenderedGltfScene scene;
     private Map<String, List<InterpolatedChannel>> animations;
     private Set<NodeModel> animNode;
+
+    boolean main_is_update = false;
+    boolean use_is_update = false;
 
     public void initialize(RenderedGltfModel renderedModel) {
         scene = renderedModel.renderedGltfScenes.get(0);
@@ -78,17 +81,22 @@ public class ModelRendererData {
         return animations;
     }
 
-    public List<InterpolatedChannel> getMainAnimations(Player player, float partialTick) {
-        List<InterpolatedChannel> list;
-
-        PlayerState state = AnimationsManager.getManager().refreshPlayerState(player, partialTick);
-        String[] main_name = state.getMainAnimName();
-
-        list = animations.get(main_name[0]);
-        if (list == null && main_name.length > 1) list = animations.get(main_name[0]);
+    private List<InterpolatedChannel> getAnimations(String[] names) {
+        if (names == null) return new ArrayList<>();
+        List<InterpolatedChannel> list = animations.get(names[0]);
+        if (list == null && names.length > 1) list = animations.get(names[0]);
         if (list == null) list = animations.get(PlayerState.IDLE);
-
         return list != null ? list : new ArrayList<>();
+    }
+
+    public List<InterpolatedChannel> getMainAnimations(Player player, float partialTick) {
+        String[] names = PlayAnimationManager.getMainAnimationsName(player, partialTick, main_is_update);
+        return getAnimations(names);
+    }
+
+    public List<InterpolatedChannel> getUseAnimations(Player player, float partialTick) {
+        String[] names = PlayAnimationManager.getUseAnimationsMame(player, partialTick, use_is_update);
+        return getAnimations(names);
     }
 
     public Map<String, NodeModel> getCoreNode() {
@@ -140,44 +148,72 @@ public class ModelRendererData {
             matrixStack.mulPose(Vector3f.YP.rotationDegrees(f));
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
             matrixStack.mulPose(Vector3f.YP.rotationDegrees(270.0f));
-        } else if ((swimAmount = entity.getSwimAmount(partialTicks)) > 0f) { // 游泳
+        } /**else if ((swimAmount = entity.getSwimAmount(partialTicks)) > 0f) { // 游泳
             float g = entity.isInWater() ? 90.0f - entity.getXRot() : 90.0f;
             float h = Mth.lerp(swimAmount, 0.0f, g);
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(h));
             if (entity.isVisuallySwimming()) {
                 matrixStack.translate(0.0, -1.0, -0.3f);
             }
-        }
+        }*/ else if (pose == Pose.CROUCHING) matrixStack.translate(0, 0.15, 0);
 
+    }
+
+    private boolean rangeNumber(float[] keys, float key) {
+        int getMin = Math.max(keys.length - 2, 0);
+        int getMax = Math.max(keys.length - 1, 0);
+        if (getMax == getMin) return true;
+        float min = keys[getMin];
+        float max = keys[getMax];
+        return key >= min && key <= max;
+    }
+
+    private void playAnimation(InterpolatedChannel channel, float time, int i) {
+        float[] keys = channel.getKeys();
+        float key = time % keys[keys.length - 1];
+        switch (i) {
+            case 0 -> main_is_update = rangeNumber(keys, key);
+            case 1 -> use_is_update = rangeNumber(keys, key);
+        }
+        if (keys.length > 1) channel.update(key);
+        else channel.update(0);
     }
 
     public void renderModel(LivingEntity entity, float rotationYaw, float partialTicks, PoseStack matrixStack, int packedLight, float netHeadPitch, float netHeadYaw) {
         if (entity.isSpectator()) return;
 
-        float time = (entity.level.getGameTime() + partialTicks) / 20;
-        // 播放基础动画
-        if (entity instanceof Player player) {
-            getMainAnimations(player, partialTicks).forEach(channel -> {
-                float[] keys = channel.getKeys();
-                channel.update(time % keys[keys.length - 1]);
-            });
-        }
-
         float head_pitch = netHeadPitch * (float) (Math.PI / 180);
         float head_yaw = netHeadYaw * (float) (Math.PI / 180);
 
-        // 硬编码动画 - 转头
-        if (!entity.isVisuallySwimming()) {
-            for (Map.Entry<String, NodeModel> entry : getCoreNode().entrySet()) {
-                NodeModel node = entry.getValue();
-                if (entry.getKey().equals("Head"))
-                    node.setRotation(new float[]{-head_pitch * 0.5f, -head_yaw * 0.5f, 0.0f, 1.0f});
+        float time = (entity.level.getGameTime() + partialTicks) / 20;
+
+        if (entity instanceof Player player) {
+            // 播放基础动画
+            for (InterpolatedChannel channel : getMainAnimations(player, partialTicks)) {
+                channel.setPlayer(player);
+                playAnimation(channel, time, 0);
             }
-        } else {
-            for (Map.Entry<String, NodeModel> entry : getCoreNode().entrySet()) {
-                NodeModel node = entry.getValue();
-                if (entry.getKey().equals("Head"))
-                    node.setRotation(new float[]{-0.3f, head_yaw * 0.5f, 0, 1});
+            // 播放手部动画
+            for (InterpolatedChannel channel : getUseAnimations(player, partialTicks)) {
+                channel.setPlayer(player);
+                playAnimation(channel, time, 1);
+            }
+        }
+
+        // 硬编码动画 - 转头
+        if (getCoreNode() != null) {
+            if (entity.isVisuallySwimming() || entity.isFallFlying() || (entity instanceof Player player && player.getAbilities().flying)) {
+                for (Map.Entry<String, NodeModel> entry : getCoreNode().entrySet()) {
+                    NodeModel node = entry.getValue();
+                    if (entry.getKey().equals("Head"))
+                        node.setRotation(new float[]{0.3f, head_yaw * 0.5f, 0, 1});
+                }
+            } else {
+                for (Map.Entry<String, NodeModel> entry : getCoreNode().entrySet()) {
+                    NodeModel node = entry.getValue();
+                    if (entry.getKey().equals("Head"))
+                        node.setRotation(new float[]{-head_pitch * 0.5f, -head_yaw * 0.5f, 0.0f, 1.0f});
+                }
             }
         }
 
@@ -275,14 +311,20 @@ public class ModelRendererData {
         float[] matrix_4x4 = RenderedGltfModel.findGlobalTransform(node);
         matrix4f.add(new Matrix4f().set(matrix_4x4));
         matrixStack.pushPose();
+
         setRotations(entity, matrixStack, rotationYaw, partialTicks, netHeadPitch, netHeadYaw);
+
         org.joml.Vector3f translation = new org.joml.Vector3f();
         matrix4f.getTranslation(translation);
-        matrixStack.translate(translation.x, translation.y, translation.z);
+        matrixStack.translate(translation.x, translation.y + 0.2, translation.z + 0.2);
+
         Quaternionf q = new Quaternionf();
         matrix4f.getNormalizedRotation(q);
-        Quaternion qq = new Quaternion(q.x, q.y, q.z, q.w);
+        Quaternion qq = new Quaternion(q.x, q.z, q.y, q.w);
         matrixStack.mulPose(qq);
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+
+
         /**org.joml.Vector3f scale = new org.joml.Vector3f();
          matrix4f.getScale(scale);
          matrixStack.scale(scale.x, scale.x, scale.x);*/

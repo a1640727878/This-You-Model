@@ -12,12 +12,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import sky_bai.mod.tym.manager.*;
-import sky_bai.mod.tym.manager.data.ModelData;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public class TYM_Command {
 
