@@ -64,7 +64,7 @@ public interface CameraModel extends NamedModelElement {
      *                    camera will be used.
      * @return The result array
      */
-    float[] computeProjectionMatrix(float result[], Float aspectRatio);
+    float[] computeProjectionMatrix(float[] result, Float aspectRatio);
 
     /**
      * Create the supplier of the projection matrix for this camera model.<br>

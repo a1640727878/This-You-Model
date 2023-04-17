@@ -53,8 +53,7 @@ public final class GltfModelReader {
      * @throws IOException If the given asset has an unknown version
      */
     private static GltfModel createModel(GltfAsset gltfAsset) throws IOException {
-        if (gltfAsset instanceof GltfAssetV2) {
-            GltfAssetV2 gltfAssetV2 = (GltfAssetV2) gltfAsset;
+        if (gltfAsset instanceof GltfAssetV2 gltfAssetV2) {
             return GltfModelCreatorV2.create(gltfAssetV2);
         }
         throw new IOException(

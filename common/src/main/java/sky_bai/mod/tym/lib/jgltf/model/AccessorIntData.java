@@ -198,7 +198,7 @@ public final class AccessorIntData
      * @return The minimum values
      */
     public int[] computeMin() {
-        int result[] = new int[getNumComponentsPerElement()];
+        int[] result = new int[getNumComponentsPerElement()];
         Arrays.fill(result, Integer.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -216,7 +216,7 @@ public final class AccessorIntData
      * @return The minimum values
      */
     public int[] computeMax() {
-        int result[] = new int[getNumComponentsPerElement()];
+        int[] result = new int[getNumComponentsPerElement()];
         Arrays.fill(result, Integer.MIN_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -235,7 +235,7 @@ public final class AccessorIntData
      * @return The minimum values
      */
     public long[] computeMinLong() {
-        long result[] = new long[getNumComponentsPerElement()];
+        long[] result = new long[getNumComponentsPerElement()];
         Arrays.fill(result, Long.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -254,7 +254,7 @@ public final class AccessorIntData
      * @return The minimum values
      */
     public long[] computeMaxLong() {
-        long result[] = new long[getNumComponentsPerElement()];
+        long[] result = new long[getNumComponentsPerElement()];
         Arrays.fill(result, Long.MIN_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {

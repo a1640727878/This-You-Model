@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FileModelData implements Serializable {
-    private String name;
-    private byte[] model;
-    private byte[] arm_model;
+    private final String name;
+    private final byte[] model;
+    private final byte[] arm_model;
 
-    private Map<String, byte[]> images = new HashMap<>();
+    private final Map<String, byte[]> images = new HashMap<>();
     private String amin_json;
 
     public FileModelData(String name, byte[] model, byte[] arm_model) {

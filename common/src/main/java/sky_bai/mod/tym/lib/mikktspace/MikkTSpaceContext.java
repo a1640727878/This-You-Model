@@ -42,7 +42,7 @@ public interface MikkTSpaceContext {
      *
      * @return the count (&ge;0)
      */
-    public int getNumFaces();
+    int getNumFaces();
 
     /**
      * Returns the number of vertices on face number iFace iFace is a number in
@@ -51,7 +51,7 @@ public interface MikkTSpaceContext {
      * @param face which face (&ge;0, &lt;numFaces)
      * @return the count (&ge;0)
      */
-    public int getNumVerticesOfFace(int face);
+    int getNumVerticesOfFace(int face);
 
     /**
      * returns the position/normal/texcoord of the referenced face of vertex
@@ -62,11 +62,11 @@ public interface MikkTSpaceContext {
      * @param face   which face (&ge;0, &lt;numFaces)
      * @param vert   which vertex in the face (&ge;0, &lt;numVertices)
      */
-    public void getPosition(float posOut[], int face, int vert);
+    void getPosition(float[] posOut, int face, int vert);
 
-    public void getNormal(float normOut[], int face, int vert);
+    void getNormal(float[] normOut, int face, int vert);
 
-    public void getTexCoord(float texOut[], int face, int vert);
+    void getTexCoord(float[] texOut, int face, int vert);
 
     /**
      * The callback setTSpaceBasic() is sufficient for basic normal mapping.
@@ -87,7 +87,7 @@ public interface MikkTSpaceContext {
      * @param face    which face (&ge;0, &lt;numFaces)
      * @param vert    which vertex in the face (&ge;0, &lt;numVertices)
      */
-    public void setTSpaceBasic(float tangent[], float sign, int face, int vert);
+    void setTSpaceBasic(float[] tangent, float sign, int face, int vert);
 
     /**
      * This function is used to return tangent space results to the application.
@@ -118,6 +118,6 @@ public interface MikkTSpaceContext {
      * @param face                    which face (&ge;0, &lt;numFaces)
      * @param vert                    which vertex in the face (&ge;0, &lt;numVertices)
      */
-    void setTSpace(float tangent[], float biTangent[], float magS, float magT,
+    void setTSpace(float[] tangent, float[] biTangent, float magS, float magT,
                    boolean isOrientationPreserving, int face, int vert);
 }

@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "client.MixinClientPacketListener",
-    "client.MixinEntityRenderers"
+    "client.MixinEntityRenderers",
+    "client.MixinItemInHandRenderer",
+    "client.MixinLevelRenderer"
   ],
   "mixins": [
     "MixinCommands",

@@ -490,7 +490,7 @@ public final class MaterialModelV2 extends AbstractNamedModelElement
     /**
      * Alpha modes
      */
-    public static enum AlphaMode {
+    public enum AlphaMode {
         /**
          * Opaque mode
          */

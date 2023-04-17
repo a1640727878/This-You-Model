@@ -43,7 +43,7 @@ public interface AnimationModel extends NamedModelElement {
     /**
      * Enumeration of the different interpolation methods for an animation
      */
-    public enum Interpolation {
+    enum Interpolation {
         /**
          * Stepwise interpolation
          */
@@ -63,7 +63,7 @@ public interface AnimationModel extends NamedModelElement {
     /**
      * Interface for an animation channel
      */
-    public interface Channel {
+    interface Channel {
         /**
          * Returns the {@link Sampler} for this channel
          *
@@ -90,7 +90,7 @@ public interface AnimationModel extends NamedModelElement {
     /**
      * Interface for an animation sampler
      */
-    public interface Sampler {
+    interface Sampler {
         /**
          * Returns the {@link AccessorModel} that contains the input (time
          * key frame) data

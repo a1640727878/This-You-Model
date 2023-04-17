@@ -126,7 +126,7 @@ final class GltfReader {
         if (rootNode == null) {
             return 0;
         }
-        int version[] = VersionUtils.computeMajorMinorPatch(getVersion());
+        int[] version = VersionUtils.computeMajorMinorPatch(getVersion());
         return version[0];
     }
 

@@ -64,8 +64,8 @@ class Cameras {
      * @return The result array
      */
     static float[] computeProjectionMatrix(
-            CameraModel cameraModel, Float aspectRatio, float result[]) {
-        float localResult[] = Utils.validate(result, 16);
+            CameraModel cameraModel, Float aspectRatio, float[] result) {
+        float[] localResult = Utils.validate(result, 16);
 
         CameraPerspectiveModel cameraPerspective =
                 cameraModel.getCameraPerspectiveModel();

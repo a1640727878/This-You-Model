@@ -184,8 +184,7 @@ public class GltfAssetWriter {
      */
     public void writeBinary(GltfAsset gltfAsset, OutputStream outputStream)
             throws IOException {
-        if (gltfAsset instanceof GltfAssetV2) {
-            GltfAssetV2 gltfAssetV2 = (GltfAssetV2) gltfAsset;
+        if (gltfAsset instanceof GltfAssetV2 gltfAssetV2) {
             GltfAssetWriterV2 gltfAssetWriterV2 = new GltfAssetWriterV2();
             gltfAssetWriterV2.writeBinary(gltfAssetV2, outputStream);
         } else {

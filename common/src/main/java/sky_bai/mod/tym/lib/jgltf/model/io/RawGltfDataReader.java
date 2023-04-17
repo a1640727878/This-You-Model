@@ -80,7 +80,7 @@ public class RawGltfDataReader {
      * @throws IOException If an IO error occurs
      */
     public static RawGltfData read(InputStream inputStream) throws IOException {
-        byte rawData[] = IO.readStream(inputStream);
+        byte[] rawData = IO.readStream(inputStream);
         if (rawData.length >= 8) {
             ByteBuffer data =
                     ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN);

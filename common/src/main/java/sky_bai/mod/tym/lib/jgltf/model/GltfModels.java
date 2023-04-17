@@ -49,8 +49,7 @@ public class GltfModels {
      *                                  unknown version
      */
     public static GltfModel create(GltfAsset gltfAsset) {
-        if (gltfAsset instanceof GltfAssetV2) {
-            GltfAssetV2 gltfAssetV2 = (GltfAssetV2) gltfAsset;
+        if (gltfAsset instanceof GltfAssetV2 gltfAssetV2) {
             return GltfModelCreatorV2.create(gltfAssetV2);
         }
         throw new IllegalArgumentException(

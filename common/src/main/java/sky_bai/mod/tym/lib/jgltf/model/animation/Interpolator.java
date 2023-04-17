@@ -45,5 +45,5 @@ interface Interpolator {
      * @throws IndexOutOfBoundsException May be thrown if the arrays do not
      *                                   have the same length
      */
-    void interpolate(float a[], float b[], float alpha, float result[]);
+    void interpolate(float[] a, float[] b, float alpha, float[] result);
 }

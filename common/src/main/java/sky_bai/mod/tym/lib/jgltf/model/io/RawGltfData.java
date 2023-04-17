@@ -28,6 +28,7 @@ package sky_bai.mod.tym.lib.jgltf.model.io;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -69,9 +70,9 @@ public final class RawGltfData {
      * @return The JSON string
      */
     public String getJsonString() {
-        byte jsonDataArray[] = new byte[jsonData.capacity()];
+        byte[] jsonDataArray = new byte[jsonData.capacity()];
         jsonData.slice().get(jsonDataArray);
-        String jsonString = new String(jsonDataArray, Charset.forName("UTF-8"));
+        String jsonString = new String(jsonDataArray, StandardCharsets.UTF_8);
         return jsonString;
     }
 

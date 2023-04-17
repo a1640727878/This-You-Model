@@ -96,7 +96,7 @@ public interface NodeModel extends NamedModelElement {
      * @throws IllegalArgumentException If the given array does not have
      *                                  a length of 16
      */
-    void setMatrix(float matrix[]);
+    void setMatrix(float[] matrix);
 
     /**
      * Returns a <b>reference</b> to the array storing the translation of this
@@ -114,7 +114,7 @@ public interface NodeModel extends NamedModelElement {
      * @throws IllegalArgumentException If the given array does not have
      *                                  a length of 3
      */
-    void setTranslation(float translation[]);
+    void setTranslation(float[] translation);
 
     /**
      * Returns a <b>reference</b> to the array storing the rotation of this
@@ -133,7 +133,7 @@ public interface NodeModel extends NamedModelElement {
      * @throws IllegalArgumentException If the given array does not have
      *                                  a length of 4
      */
-    void setRotation(float rotation[]);
+    void setRotation(float[] rotation);
 
     /**
      * Returns a <b>reference</b> to the array storing the scale of this
@@ -151,7 +151,7 @@ public interface NodeModel extends NamedModelElement {
      * @throws IllegalArgumentException If the given array does not have
      *                                  a length of 3
      */
-    void setScale(float scale[]);
+    void setScale(float[] scale);
 
     /**
      * Returns a <b>reference</b> to the morph target weights,
@@ -167,7 +167,7 @@ public interface NodeModel extends NamedModelElement {
      *
      * @param weights The weights
      */
-    void setWeights(float weights[]);
+    void setWeights(float[] weights);
 
     /**
      * Computes the local transform of this node.<br>
@@ -180,7 +180,7 @@ public interface NodeModel extends NamedModelElement {
      * @param result The result array
      * @return The result array
      */
-    float[] computeLocalTransform(float result[]);
+    float[] computeLocalTransform(float[] result);
 
     /**
      * Computes the global transform of this node.<br>
@@ -193,7 +193,7 @@ public interface NodeModel extends NamedModelElement {
      * @param result The result array
      * @return The result array
      */
-    float[] computeGlobalTransform(float result[]);
+    float[] computeGlobalTransform(float[] result);
 
     /**
      * Creates a supplier for the global transform matrix of this node
@@ -221,6 +221,8 @@ public interface NodeModel extends NamedModelElement {
      * @return The supplier
      */
     Supplier<float[]> createLocalTransformSupplier();
+
+    void eliminate();
 
     void record();
 

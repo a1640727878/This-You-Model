@@ -63,8 +63,8 @@ public class VersionUtils {
      * @return An array containing 3 values: The major, minor and patch version
      */
     static int[] computeMajorMinorPatch(String v) {
-        int result[] = new int[3];
-        String tokens[] = v.split("\\.");
+        int[] result = new int[3];
+        String[] tokens = v.split("\\.");
         int n = Math.min(tokens.length, 3);
         for (int i = 0; i < n; i++) {
             String token = tokens[i];

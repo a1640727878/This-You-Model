@@ -54,7 +54,7 @@ public class Buffers {
         if (byteBuffer == null) {
             return null;
         }
-        byte array[] = new byte[byteBuffer.capacity()];
+        byte[] array = new byte[byteBuffer.capacity()];
         byteBuffer.slice().get(array);
         return new String(array);
     }
@@ -120,7 +120,7 @@ public class Buffers {
      * @param data The data
      * @return The byte buffer
      */
-    public static ByteBuffer create(byte data[]) {
+    public static ByteBuffer create(byte[] data) {
         return create(data, 0, data.length);
     }
 
@@ -133,7 +133,7 @@ public class Buffers {
      * @param length The length of the range
      * @return The byte buffer
      */
-    public static ByteBuffer create(byte data[], int offset, int length) {
+    public static ByteBuffer create(byte[] data, int offset, int length) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(length);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         byteBuffer.put(data, offset, length);

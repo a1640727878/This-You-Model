@@ -38,7 +38,11 @@ public class GlTFModelManager {
             } catch (IOException ignored) {
             }
         }
-        default_model = ModelData.getDefaultData(loadDefaultModel(), loadDefaultModel(),loadDefaultModel());
+        GltfModel[] models = new GltfModel[3];
+        for (int i = 0; i < models.length; i++) {
+            models[i] = loadDefaultModel();
+        }
+        default_model = ModelData.getDefaultData(models);
     }
 
     private GltfModel loadDefaultModel() {

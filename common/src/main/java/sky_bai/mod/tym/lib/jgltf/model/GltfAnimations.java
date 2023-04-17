@@ -143,21 +143,19 @@ public class GltfAnimations {
 
         AccessorModel input = sampler.getInput();
         AccessorData inputData = input.getAccessorData();
-        if (!(inputData instanceof AccessorFloatData)) {
+        if (!(inputData instanceof AccessorFloatData inputFloatData)) {
             logger.warning("Input data is not an AccessorFloatData, but "
                     + inputData.getClass());
             return null;
         }
-        AccessorFloatData inputFloatData = (AccessorFloatData) inputData;
 
         AccessorModel output = sampler.getOutput();
         AccessorData outputData = output.getAccessorData();
-        if (!(outputData instanceof AccessorFloatData)) {
+        if (!(outputData instanceof AccessorFloatData outputFloatData)) {
             logger.warning("Output data is not an AccessorFloatData, but "
                     + outputData.getClass());
             return null;
         }
-        AccessorFloatData outputFloatData = (AccessorFloatData) outputData;
 
         Animation modelAnimation =
                 createAnimation(inputFloatData, outputFloatData, interpolatorType);
@@ -213,7 +211,7 @@ public class GltfAnimations {
             AccessorFloatData outputData,
             InterpolatorType interpolatorType) {
         int numKeyElements = timeData.getNumElements();
-        float keys[] = new float[numKeyElements];
+        float[] keys = new float[numKeyElements];
         for (int e = 0; e < numKeyElements; e++) {
             keys[e] = timeData.get(e);
         }
@@ -230,7 +228,7 @@ public class GltfAnimations {
                 outputData.getTotalNumComponents();
         int numComponentsPerElement =
                 totalNumValueComponents / numKeyElements;
-        float values[][] = new float[numKeyElements][numComponentsPerElement];
+        float[][] values = new float[numKeyElements][numComponentsPerElement];
         for (int c = 0; c < numComponentsPerElement; c++) {
             for (int e = 0; e < numKeyElements; e++) {
                 // Access the data using the global index, computed manually
@@ -290,7 +288,7 @@ public class GltfAnimations {
             NodeModel nodeModel) {
         return (animation, timeS, values) ->
         {
-            float translation[] = nodeModel.getTranslation();
+            float[] translation = nodeModel.getTranslation();
             if (translation == null) {
                 translation = values.clone();
                 nodeModel.setTranslation(translation);
@@ -312,7 +310,7 @@ public class GltfAnimations {
             NodeModel nodeModel) {
         return (animation, timeS, values) ->
         {
-            float rotation[] = nodeModel.getRotation();
+            float[] rotation = nodeModel.getRotation();
             if (rotation == null) {
                 rotation = values.clone();
                 nodeModel.setRotation(rotation);
@@ -334,7 +332,7 @@ public class GltfAnimations {
             NodeModel nodeModel) {
         return (animation, timeS, values) ->
         {
-            float scale[] = nodeModel.getScale();
+            float[] scale = nodeModel.getScale();
             if (scale == null) {
                 scale = values.clone();
                 nodeModel.setScale(scale);
@@ -356,7 +354,7 @@ public class GltfAnimations {
             NodeModel nodeModel) {
         return (animation, timeS, values) ->
         {
-            float weights[] = nodeModel.getWeights();
+            float[] weights = nodeModel.getWeights();
             if (weights == null) {
                 weights = values.clone();
                 nodeModel.setWeights(weights);

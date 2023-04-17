@@ -41,13 +41,13 @@ public final class Animation {
     /**
      * The key frame times, in seconds
      */
-    private final float timesS[];
+    private final float[] timesS;
 
     /**
      * The values. Each element of this array corresponds to one key
      * frame time
      */
-    private final float values[][];
+    private final float[][] values;
 
     /**
      * The interpolator for the values
@@ -59,7 +59,7 @@ public final class Animation {
      * to the listeners. The listeners are not allowed to store or
      * modify this array.
      */
-    private final float outputValues[];
+    private final float[] outputValues;
 
     /**
      * The {@link AnimationListener}s that are informed about the progress
@@ -85,8 +85,8 @@ public final class Animation {
      *                                  has a length that is different from the length of the times array.
      */
     public Animation(
-            float timesS[],
-            float values[][],
+            float[] timesS,
+            float[][] values,
             InterpolatorType interpolatorType) {
         Objects.requireNonNull(timesS, "The times may not be null");
         Objects.requireNonNull(values, "The values may not be null");
@@ -172,8 +172,8 @@ public final class Animation {
         //System.out.println("index1 "+index1);
         //System.out.println("alpha  "+alpha);
 
-        float a[] = values[index0];
-        float b[] = values[index1];
+        float[] a = values[index0];
+        float[] b = values[index1];
         interpolator.interpolate(a, b, alpha, outputValues);
         for (AnimationListener listener : listeners) {
             listener.animationUpdated(this, timeS, outputValues);

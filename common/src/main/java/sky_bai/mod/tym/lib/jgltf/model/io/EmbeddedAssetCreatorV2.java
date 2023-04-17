@@ -67,7 +67,7 @@ final class EmbeddedAssetCreatorV2 {
         BufferModel bufferModel = gltfModel.getBufferModels().get(index);
         ByteBuffer bufferData = bufferModel.getBufferData();
 
-        byte data[] = new byte[bufferData.capacity()];
+        byte[] data = new byte[bufferData.capacity()];
         bufferData.slice().get(data);
         String encodedData = Base64.getEncoder().encodeToString(data);
         String dataUriString =
@@ -103,7 +103,7 @@ final class EmbeddedAssetCreatorV2 {
                     "Could not detect MIME type of image " + index);
         }
 
-        byte data[] = new byte[imageData.capacity()];
+        byte[] data = new byte[imageData.capacity()];
         imageData.slice().get(data);
         String encodedData = Base64.getEncoder().encodeToString(data);
         String dataUriString =

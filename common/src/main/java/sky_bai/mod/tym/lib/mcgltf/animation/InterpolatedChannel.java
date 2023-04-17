@@ -29,7 +29,7 @@ public abstract class InterpolatedChannel {
      * @param keys The sorted keys
      * @return The index for the key
      */
-    public static int computeIndex(float key, float keys[]) {
+    public static int computeIndex(float key, float[] keys) {
         int index = Arrays.binarySearch(keys, key);
         if (index >= 0) {
             return index;

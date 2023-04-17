@@ -448,27 +448,19 @@ public class AccessorDatas {
      * @throws IllegalArgumentException If the given model has an unknown type
      */
     public static Number[] computeMin(AccessorData accessorData) {
-        if (accessorData instanceof AccessorByteData) {
-            AccessorByteData accessorByteData =
-                    (AccessorByteData) accessorData;
+        if (accessorData instanceof AccessorByteData accessorByteData) {
             return NumberArrays.asNumbers(
                     accessorByteData.computeMinInt());
         }
-        if (accessorData instanceof AccessorShortData) {
-            AccessorShortData accessorShortData =
-                    (AccessorShortData) accessorData;
+        if (accessorData instanceof AccessorShortData accessorShortData) {
             return NumberArrays.asNumbers(
                     accessorShortData.computeMinInt());
         }
-        if (accessorData instanceof AccessorIntData) {
-            AccessorIntData accessorIntData =
-                    (AccessorIntData) accessorData;
+        if (accessorData instanceof AccessorIntData accessorIntData) {
             return NumberArrays.asNumbers(
                     accessorIntData.computeMinLong());
         }
-        if (accessorData instanceof AccessorFloatData) {
-            AccessorFloatData accessorFloatData =
-                    (AccessorFloatData) accessorData;
+        if (accessorData instanceof AccessorFloatData accessorFloatData) {
             return NumberArrays.asNumbers(
                     accessorFloatData.computeMin());
         }
@@ -485,27 +477,19 @@ public class AccessorDatas {
      * @throws IllegalArgumentException If the given model has an unknown type
      */
     public static Number[] computeMax(AccessorData accessorData) {
-        if (accessorData instanceof AccessorByteData) {
-            AccessorByteData accessorByteData =
-                    (AccessorByteData) accessorData;
+        if (accessorData instanceof AccessorByteData accessorByteData) {
             return NumberArrays.asNumbers(
                     accessorByteData.computeMaxInt());
         }
-        if (accessorData instanceof AccessorShortData) {
-            AccessorShortData accessorShortData =
-                    (AccessorShortData) accessorData;
+        if (accessorData instanceof AccessorShortData accessorShortData) {
             return NumberArrays.asNumbers(
                     accessorShortData.computeMaxInt());
         }
-        if (accessorData instanceof AccessorIntData) {
-            AccessorIntData accessorIntData =
-                    (AccessorIntData) accessorData;
+        if (accessorData instanceof AccessorIntData accessorIntData) {
             return NumberArrays.asNumbers(
                     accessorIntData.computeMaxLong());
         }
-        if (accessorData instanceof AccessorFloatData) {
-            AccessorFloatData accessorFloatData =
-                    (AccessorFloatData) accessorData;
+        if (accessorData instanceof AccessorFloatData accessorFloatData) {
             return NumberArrays.asNumbers(
                     accessorFloatData.computeMax());
         }
@@ -529,33 +513,25 @@ public class AccessorDatas {
      */
     public static String createString(
             AccessorData accessorData, int elementsPerRow) {
-        if (accessorData instanceof AccessorByteData) {
-            AccessorByteData accessorByteData =
-                    (AccessorByteData) accessorData;
+        if (accessorData instanceof AccessorByteData accessorByteData) {
             String accessorDataString =
                     accessorByteData.createString(
                             Locale.ENGLISH, "%4d", elementsPerRow);
             return accessorDataString;
         }
-        if (accessorData instanceof AccessorShortData) {
-            AccessorShortData accessorShortData =
-                    (AccessorShortData) accessorData;
+        if (accessorData instanceof AccessorShortData accessorShortData) {
             String accessorDataString =
                     accessorShortData.createString(
                             Locale.ENGLISH, "%6d", elementsPerRow);
             return accessorDataString;
         }
-        if (accessorData instanceof AccessorIntData) {
-            AccessorIntData accessorIntData =
-                    (AccessorIntData) accessorData;
+        if (accessorData instanceof AccessorIntData accessorIntData) {
             String accessorDataString =
                     accessorIntData.createString(
                             Locale.ENGLISH, "%11d", elementsPerRow);
             return accessorDataString;
         }
-        if (accessorData instanceof AccessorFloatData) {
-            AccessorFloatData accessorFloatData =
-                    (AccessorFloatData) accessorData;
+        if (accessorData instanceof AccessorFloatData accessorFloatData) {
             String accessorDataString =
                     accessorFloatData.createString(
                             Locale.ENGLISH, "%10.5f", elementsPerRow);

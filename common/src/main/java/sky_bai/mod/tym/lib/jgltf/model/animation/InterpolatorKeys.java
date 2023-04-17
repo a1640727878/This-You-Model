@@ -43,7 +43,7 @@ class InterpolatorKeys {
      * @param keys The sorted keys
      * @return The index for the key
      */
-    static int computeIndex(float key, float keys[]) {
+    static int computeIndex(float key, float[] keys) {
         int index = Arrays.binarySearch(keys, key);
         if (index >= 0) {
             return index;
@@ -61,7 +61,7 @@ class InterpolatorKeys {
      * @param index The index of the key
      * @return The alpha value
      */
-    static float computeAlpha(float key, float keys[], int index) {
+    static float computeAlpha(float key, float[] keys, int index) {
         if (key <= keys[0]) {
             return 0.0f;
         }
@@ -81,7 +81,7 @@ class InterpolatorKeys {
      * @param args Not used
      */
     public static void main(String[] args) {
-        float keys[] = {1, 8, 11};
+        float[] keys = {1, 8, 11};
         for (float d = -1; d <= 12; d += 0.1) {
             int index = computeIndex(d, keys);
             float alpha = computeAlpha(d, keys, index);

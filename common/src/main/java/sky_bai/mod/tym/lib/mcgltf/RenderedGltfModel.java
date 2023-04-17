@@ -161,7 +161,7 @@ public class RenderedGltfModel {
      * @param value The value
      * @return The FloatBuffer
      */
-    public static FloatBuffer putFloatBuffer(float value[]) {
+    public static FloatBuffer putFloatBuffer(float[] value) {
         int total = value.length;
         if (uniformFloatBuffer == null || uniformFloatBuffer.capacity() < total) {
             uniformFloatBuffer = BufferUtils.createFloatBuffer(total);
@@ -183,6 +183,7 @@ public class RenderedGltfModel {
                 List<Runnable> rootSkinningCommands;
                 List<Runnable> vanillaRootRenderCommands;
                 List<Runnable> shaderModRootRenderCommands;
+                List<Runnable> translucenceRenderCommands;
                 if (commands == null) {
                     rootSkinningCommands = new ArrayList<Runnable>();
                     vanillaRootRenderCommands = new ArrayList<Runnable>();
@@ -201,7 +202,10 @@ public class RenderedGltfModel {
         }
     }
 
-    protected void processNodeModel(List<Runnable> gltfRenderData, NodeModel nodeModel, List<Runnable> skinningCommands, List<Runnable> vanillaRenderCommands, List<Runnable> shaderModRenderCommands) {
+    protected void processNodeModel(List<Runnable> gltfRenderData, NodeModel nodeModel, List<Runnable> skinningCommands,
+                                    List<Runnable> vanillaRenderCommands,
+                                    List<Runnable> shaderModRenderCommands
+    ) {
         ArrayList<Runnable> nodeSkinningCommands = new ArrayList<Runnable>();
         ArrayList<Runnable> vanillaNodeRenderCommands = new ArrayList<Runnable>();
         ArrayList<Runnable> shaderModNodeRenderCommands = new ArrayList<Runnable>();
@@ -234,7 +238,7 @@ public class RenderedGltfModel {
                 int jointMatrixBuffer = GL15.glGenBuffers();
                 gltfRenderData.add(() -> GL15.glDeleteBuffers(jointMatrixBuffer));
                 GL15.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, jointMatrixBuffer);
-                GL15.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER, jointMatrixSize * Float.BYTES, GL15.GL_STATIC_DRAW);
+                GL15.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER, (long) jointMatrixSize * Float.BYTES, GL15.GL_STATIC_DRAW);
 
                 List<Runnable> jointMatricesTransformCommands = new ArrayList<Runnable>(jointCount);
                 for (int joint = 0; joint < jointCount; joint++) {
@@ -337,6 +341,7 @@ public class RenderedGltfModel {
                     shaderModNodeRenderCommands.forEach(Runnable::run);
                 }
             });
+
         }
     }
 
@@ -2472,8 +2477,7 @@ public class RenderedGltfModel {
         ModelType.Builder<Material> type = ModelType.builder();
         Material material = extrasToMaterial.get(model);
         if (material != null) return type.set(material).build();
-        if (model instanceof MaterialModelV2) {
-            MaterialModelV2 v2 = (MaterialModelV2) model;
+        if (model instanceof MaterialModelV2 v2) {
             material = new Material();
             material.baseColorFactor = v2.getBaseColorFactor();
             material.doubleSided = v2.isDoubleSided();
@@ -2547,13 +2551,13 @@ public class RenderedGltfModel {
             positionsAccessorModelToNormalsAccessorModel.put(positionsAccessorModel, normalsAccessorModel);
             AccessorFloatData positionsAccessorData = AccessorDatas.createFloat(positionsAccessorModel);
             AccessorFloatData normalsAccessorData = AccessorDatas.createFloat(normalsAccessorModel);
-            float vertex0[] = new float[3];
-            float vertex1[] = new float[3];
-            float vertex2[] = new float[3];
-            float edge01[] = new float[3];
-            float edge02[] = new float[3];
-            float cross[] = new float[3];
-            float normal[] = new float[3];
+            float[] vertex0 = new float[3];
+            float[] vertex1 = new float[3];
+            float[] vertex2 = new float[3];
+            float[] edge01 = new float[3];
+            float[] edge02 = new float[3];
+            float[] cross = new float[3];
+            float[] normal = new float[3];
             for (int i = 0; i < numTriangles; i++) {
                 int index0 = i * 3;
                 int index1 = index0 + 1;
@@ -2704,8 +2708,7 @@ public class RenderedGltfModel {
                 colorsVec4AccessorModel = AccessorModelCreation.createAccessorModel(colorsAccessorModel.getComponentType(), count, ElementType.VEC4, "");
                 colorsAccessorModelVec3ToVec4.put(colorsAccessorModel, colorsVec4AccessorModel);
                 AccessorData accessorData = AccessorDatas.create(colorsVec4AccessorModel);
-                if (accessorData instanceof AccessorByteData) {
-                    AccessorByteData colorsVec4AccessorData = (AccessorByteData) accessorData;
+                if (accessorData instanceof AccessorByteData colorsVec4AccessorData) {
                     AccessorByteData colorsAccessorData = AccessorDatas.createByte(colorsAccessorModel);
                     if (colorsAccessorData.isUnsigned()) {
                         for (int i = 0; i < count; i++) {
@@ -2722,8 +2725,7 @@ public class RenderedGltfModel {
                             colorsVec4AccessorData.set(i, 3, Byte.MAX_VALUE);
                         }
                     }
-                } else if (accessorData instanceof AccessorShortData) {
-                    AccessorShortData colorsVec4AccessorData = (AccessorShortData) accessorData;
+                } else if (accessorData instanceof AccessorShortData colorsVec4AccessorData) {
                     AccessorShortData colorsAccessorData = AccessorDatas.createShort(colorsAccessorModel);
                     if (colorsAccessorData.isUnsigned()) {
                         for (int i = 0; i < count; i++) {
@@ -2740,8 +2742,7 @@ public class RenderedGltfModel {
                             colorsVec4AccessorData.set(i, 3, Short.MAX_VALUE);
                         }
                     }
-                } else if (accessorData instanceof AccessorFloatData) {
-                    AccessorFloatData colorsVec4AccessorData = (AccessorFloatData) accessorData;
+                } else if (accessorData instanceof AccessorFloatData colorsVec4AccessorData) {
                     AccessorFloatData colorsAccessorData = AccessorDatas.createFloat(colorsAccessorModel);
                     for (int i = 0; i < count; i++) {
                         colorsVec4AccessorData.set(i, 0, colorsAccessorData.get(i, 0));
@@ -2811,7 +2812,7 @@ public class RenderedGltfModel {
         AccessorFloatData baseAccessorData = AccessorDatas.createFloat(baseAccessorModel);
         AccessorFloatData morphedAccessorData = AccessorDatas.createFloat(morphedAccessorModel);
 
-        float weights[] = new float[targetAccessorDatas.size()];
+        float[] weights = new float[targetAccessorDatas.size()];
         int numComponents = 3;
         int numElements = morphedAccessorData.getNumElements();
 
@@ -2849,7 +2850,7 @@ public class RenderedGltfModel {
         if (indicesAccessorModel != null) {
             unindexed = meshPrimitiveModelToUnindexed.get(meshPrimitiveModel);
             if (unindexed == null) {
-                int indices[] = AccessorDataUtils.readInts(AccessorDatas.create(indicesAccessorModel));
+                int[] indices = AccessorDataUtils.readInts(AccessorDatas.create(indicesAccessorModel));
                 Map<String, AccessorModel> attributes = meshPrimitiveModel.getAttributes();
                 Map<String, AccessorModel> attributesUnindexed = new LinkedHashMap<String, AccessorModel>(attributes.size());
                 attributes.forEach((name, attribute) -> {
@@ -2858,8 +2859,7 @@ public class RenderedGltfModel {
                     AccessorModel accessorModel = AccessorModelCreation.createAccessorModel(attribute.getComponentType(), indices.length, elementType, "");
                     attributesUnindexed.put(name, accessorModel);
                     AccessorData accessorData = AccessorDatas.create(accessorModel);
-                    if (accessorData instanceof AccessorByteData) {
-                        AccessorByteData accessorDataUnindexed = (AccessorByteData) accessorData;
+                    if (accessorData instanceof AccessorByteData accessorDataUnindexed) {
                         AccessorByteData accessorDataIndexed = AccessorDatas.createByte(attribute);
                         for (int i = 0; i < indices.length; i++) {
                             int index = indices[i];
@@ -2867,8 +2867,7 @@ public class RenderedGltfModel {
                                 accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                             }
                         }
-                    } else if (accessorData instanceof AccessorShortData) {
-                        AccessorShortData accessorDataUnindexed = (AccessorShortData) accessorData;
+                    } else if (accessorData instanceof AccessorShortData accessorDataUnindexed) {
                         AccessorShortData accessorDataIndexed = AccessorDatas.createShort(attribute);
                         for (int i = 0; i < indices.length; i++) {
                             int index = indices[i];
@@ -2876,8 +2875,7 @@ public class RenderedGltfModel {
                                 accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                             }
                         }
-                    } else if (accessorData instanceof AccessorIntData) {
-                        AccessorIntData accessorDataUnindexed = (AccessorIntData) accessorData;
+                    } else if (accessorData instanceof AccessorIntData accessorDataUnindexed) {
                         AccessorIntData accessorDataIndexed = AccessorDatas.createInt(attribute);
                         for (int i = 0; i < indices.length; i++) {
                             int index = indices[i];
@@ -2885,8 +2883,7 @@ public class RenderedGltfModel {
                                 accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                             }
                         }
-                    } else if (accessorData instanceof AccessorFloatData) {
-                        AccessorFloatData accessorDataUnindexed = (AccessorFloatData) accessorData;
+                    } else if (accessorData instanceof AccessorFloatData accessorDataUnindexed) {
                         AccessorFloatData accessorDataIndexed = AccessorDatas.createFloat(attribute);
                         for (int i = 0; i < indices.length; i++) {
                             int index = indices[i];
@@ -2908,8 +2905,7 @@ public class RenderedGltfModel {
                         AccessorModel accessorModel = AccessorModelCreation.createAccessorModel(attribute.getComponentType(), indices.length, elementType, "");
                         targetUnindexed.put(name, accessorModel);
                         AccessorData accessorData = AccessorDatas.create(accessorModel);
-                        if (accessorData instanceof AccessorByteData) {
-                            AccessorByteData accessorDataUnindexed = (AccessorByteData) accessorData;
+                        if (accessorData instanceof AccessorByteData accessorDataUnindexed) {
                             AccessorByteData accessorDataIndexed = AccessorDatas.createByte(attribute);
                             for (int i = 0; i < indices.length; i++) {
                                 int index = indices[i];
@@ -2917,8 +2913,7 @@ public class RenderedGltfModel {
                                     accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                                 }
                             }
-                        } else if (accessorData instanceof AccessorShortData) {
-                            AccessorShortData accessorDataUnindexed = (AccessorShortData) accessorData;
+                        } else if (accessorData instanceof AccessorShortData accessorDataUnindexed) {
                             AccessorShortData accessorDataIndexed = AccessorDatas.createShort(attribute);
                             for (int i = 0; i < indices.length; i++) {
                                 int index = indices[i];
@@ -2926,8 +2921,7 @@ public class RenderedGltfModel {
                                     accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                                 }
                             }
-                        } else if (accessorData instanceof AccessorIntData) {
-                            AccessorIntData accessorDataUnindexed = (AccessorIntData) accessorData;
+                        } else if (accessorData instanceof AccessorIntData accessorDataUnindexed) {
                             AccessorIntData accessorDataIndexed = AccessorDatas.createInt(attribute);
                             for (int i = 0; i < indices.length; i++) {
                                 int index = indices[i];
@@ -2935,8 +2929,7 @@ public class RenderedGltfModel {
                                     accessorDataUnindexed.set(i, j, accessorDataIndexed.get(index, j));
                                 }
                             }
-                        } else if (accessorData instanceof AccessorFloatData) {
-                            AccessorFloatData accessorDataUnindexed = (AccessorFloatData) accessorData;
+                        } else if (accessorData instanceof AccessorFloatData accessorDataUnindexed) {
                             AccessorFloatData accessorDataIndexed = AccessorDatas.createFloat(attribute);
                             for (int i = 0; i < indices.length; i++) {
                                 int index = indices[i];
@@ -3929,7 +3922,7 @@ public class RenderedGltfModel {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferView);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, morphedBufferViewData, GL15.GL_STATIC_DRAW);
 
-        float weights[] = new float[targetAccessorDatas.size()];
+        float[] weights = new float[targetAccessorDatas.size()];
         int numComponents = 3;
         int numElements = morphedAccessorData.getNumElements();
 
@@ -3994,7 +3987,7 @@ public class RenderedGltfModel {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferView);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, morphedBufferViewData, GL15.GL_STATIC_DRAW);
 
-        float weights[] = new float[targetAccessorDatas.size()];
+        float[] weights = new float[targetAccessorDatas.size()];
         int numComponents = 4;
         int numElements = morphedAccessorData.getNumElements();
 
@@ -4058,7 +4051,7 @@ public class RenderedGltfModel {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferView);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, morphedBufferViewData, GL15.GL_STATIC_DRAW);
 
-        float weights[] = new float[targetAccessorDatas.size()];
+        float[] weights = new float[targetAccessorDatas.size()];
         int numComponents = 2;
         int numElements = morphedAccessorData.getNumElements();
 

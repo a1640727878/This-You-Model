@@ -149,7 +149,7 @@ public final class AccessorFloatData
      * @return The minimum values
      */
     public float[] computeMin() {
-        float result[] = new float[getNumComponentsPerElement()];
+        float[] result = new float[getNumComponentsPerElement()];
         Arrays.fill(result, Float.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -167,7 +167,7 @@ public final class AccessorFloatData
      * @return The minimum values
      */
     public float[] computeMax() {
-        float result[] = new float[getNumComponentsPerElement()];
+        float[] result = new float[getNumComponentsPerElement()];
         Arrays.fill(result, -Float.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {

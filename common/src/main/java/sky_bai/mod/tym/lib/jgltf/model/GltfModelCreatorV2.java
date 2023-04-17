@@ -728,7 +728,7 @@ public class GltfModelCreatorV2 {
             } else {
                 String uri = buffer.getUri();
                 if (IO.isDataUriString(uri)) {
-                    byte data[] = IO.readDataUri(uri);
+                    byte[] data = IO.readDataUri(uri);
                     ByteBuffer bufferData = Buffers.create(data);
                     bufferModel.setBufferData(bufferData);
                 } else {
@@ -876,10 +876,10 @@ public class GltfModelCreatorV2 {
                 nodeModel.setCameraModel(cameraModel);
             }
 
-            float matrix[] = node.getMatrix();
-            float translation[] = node.getTranslation();
-            float rotation[] = node.getRotation();
-            float scale[] = node.getScale();
+            float[] matrix = node.getMatrix();
+            float[] translation = node.getTranslation();
+            float[] rotation = node.getRotation();
+            float[] scale = node.getScale();
             nodeModel.setMatrix(Optionals.clone(matrix));
             nodeModel.setTranslation(Optionals.clone(translation));
             nodeModel.setRotation(Optionals.clone(rotation));
@@ -887,7 +887,7 @@ public class GltfModelCreatorV2 {
 
             List<Float> weights = node.getWeights();
             if (weights != null) {
-                float weightsArray[] = new float[weights.size()];
+                float[] weightsArray = new float[weights.size()];
                 for (int j = 0; j < weights.size(); j++) {
                     weightsArray[j] = weights.get(j);
                 }
@@ -986,7 +986,7 @@ public class GltfModelCreatorV2 {
             } else {
                 String uri = image.getUri();
                 if (IO.isDataUriString(uri)) {
-                    byte data[] = IO.readDataUri(uri);
+                    byte[] data = IO.readDataUri(uri);
                     ByteBuffer imageData = Buffers.create(data);
                     imageModel.setImageData(imageData);
                 } else {

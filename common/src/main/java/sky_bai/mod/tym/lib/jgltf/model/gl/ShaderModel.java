@@ -71,7 +71,7 @@ public interface ShaderModel extends NamedModelElement {
     /**
      * Enumeration of different shader types
      */
-    public enum ShaderType {
+    enum ShaderType {
         /**
          * The vertex shader type
          */

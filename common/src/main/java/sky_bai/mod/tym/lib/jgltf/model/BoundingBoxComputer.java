@@ -63,7 +63,7 @@ class BoundingBoxComputer {
         BoundingBox boundingBox = new BoundingBox();
         List<SceneModel> sceneModels = gltfModel.getSceneModels();
         for (SceneModel sceneModel : sceneModels) {
-            float rootTransform[] = MathUtils.createIdentity4x4();
+            float[] rootTransform = MathUtils.createIdentity4x4();
             computeSceneBoundingBox(sceneModel, rootTransform, boundingBox);
         }
         return boundingBox;
@@ -82,7 +82,7 @@ class BoundingBoxComputer {
      * @return The result
      */
     private BoundingBox computeSceneBoundingBox(
-            SceneModel sceneModel, float transform[], BoundingBox boundingBox) {
+            SceneModel sceneModel, float[] transform, BoundingBox boundingBox) {
         BoundingBox localResult = boundingBox;
         if (localResult == null) {
             localResult = new BoundingBox();
@@ -108,7 +108,7 @@ class BoundingBoxComputer {
      * @return The result
      */
     private BoundingBox computeNodeBoundingBox(
-            NodeModel nodeModel, float parentTransform[], BoundingBox boundingBox) {
+            NodeModel nodeModel, float[] parentTransform, BoundingBox boundingBox) {
         BoundingBox result = boundingBox;
         if (result == null) {
             result = new BoundingBox();
@@ -146,7 +146,7 @@ class BoundingBoxComputer {
      * @return The result
      */
     private BoundingBox computeMeshBoundingBox(
-            MeshModel meshModel, float transform[], BoundingBox boundingBox) {
+            MeshModel meshModel, float[] transform, BoundingBox boundingBox) {
         BoundingBox result = boundingBox;
         if (result == null) {
             result = new BoundingBox();
@@ -179,7 +179,7 @@ class BoundingBoxComputer {
      * returned.
      */
     private BoundingBox computeBoundingBox(
-            MeshPrimitiveModel meshPrimitiveModel, float transform[]) {
+            MeshPrimitiveModel meshPrimitiveModel, float[] transform) {
         Map<String, AccessorModel> attributes =
                 meshPrimitiveModel.getAttributes();
         String positionsAttributeName = "POSITION";
@@ -207,8 +207,8 @@ class BoundingBoxComputer {
         AccessorData accessorData = accessorModel.getAccessorData();
         AccessorFloatData accessorFloatData = (AccessorFloatData) accessorData;
 
-        float point[] = new float[3];
-        float transformedPoint[];
+        float[] point = new float[3];
+        float[] transformedPoint;
         if (transform != null) {
             transformedPoint = new float[3];
         } else {

@@ -46,7 +46,7 @@ public class Utils {
      * @param length The length
      * @return The array, or a new array with the desired length
      */
-    public static float[] validate(float array[], int length) {
+    public static float[] validate(float[] array, int length) {
         if (array != null && array.length == length) {
             return array;
         }

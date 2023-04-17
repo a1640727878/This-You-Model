@@ -72,7 +72,7 @@ public class MathUtils {
      * @return The matrix
      */
     public static float[] createIdentity4x4() {
-        float m[] = new float[16];
+        float[] m = new float[16];
         setIdentity4x4(m);
         return m;
     }
@@ -82,7 +82,7 @@ public class MathUtils {
      *
      * @param m The matrix
      */
-    public static void setIdentity4x4(float m[]) {
+    public static void setIdentity4x4(float[] m) {
         Arrays.fill(m, 0.0f);
         m[0] = 1.0f;
         m[5] = 1.0f;
@@ -95,7 +95,7 @@ public class MathUtils {
      *
      * @param m The matrix
      */
-    static void setIdentity3x3(float m[]) {
+    static void setIdentity3x3(float[] m) {
         Arrays.fill(m, 0.0f);
         m[0] = 1.0f;
         m[4] = 1.0f;
@@ -110,7 +110,7 @@ public class MathUtils {
      * @param source The source array
      * @param target The target array
      */
-    static void set(float source[], float target[]) {
+    static void set(float[] source, float[] target) {
         System.arraycopy(source, 0, target, 0,
                 Math.min(source.length, target.length));
     }
@@ -124,7 +124,7 @@ public class MathUtils {
      * @param targetMatrix3x3 The target matrix
      */
     public static void getRotationScale(
-            float sourceMatrix4x4[], float targetMatrix3x3[]) {
+            float[] sourceMatrix4x4, float[] targetMatrix3x3) {
         targetMatrix3x3[0] = sourceMatrix4x4[0];
         targetMatrix3x3[1] = sourceMatrix4x4[1];
         targetMatrix3x3[2] = sourceMatrix4x4[2];
@@ -144,7 +144,7 @@ public class MathUtils {
      * @param m The input matrix
      * @param t The target matrix
      */
-    static void transpose3x3(float m[], float t[]) {
+    static void transpose3x3(float[] m, float[] t) {
         float m0 = m[0];
         float m1 = m[1];
         float m2 = m[2];
@@ -172,7 +172,7 @@ public class MathUtils {
      * @param m The input matrix
      * @param t The target matrix
      */
-    public static void transpose4x4(float m[], float t[]) {
+    public static void transpose4x4(float[] m, float[] t) {
         float m0 = m[0];
         float m1 = m[1];
         float m2 = m[2];
@@ -214,7 +214,7 @@ public class MathUtils {
      * @param b The second matrix
      * @param m The result matrix
      */
-    public static void mul4x4(float a[], float b[], float m[]) {
+    public static void mul4x4(float[] a, float[] b, float[] m) {
         float a00 = a[0];
         float a10 = a[1];
         float a20 = a[2];
@@ -295,7 +295,7 @@ public class MathUtils {
      * @param q The quaternion
      * @param m The matrix
      */
-    public static void quaternionToMatrix4x4(float q[], float m[]) {
+    public static void quaternionToMatrix4x4(float[] q, float[] m) {
         float invLength = 1.0f / (float) Math.sqrt(dot(q, q));
 
         // Adapted from javax.vecmath.Matrix4f
@@ -329,7 +329,7 @@ public class MathUtils {
      * @param m   The input matrix
      * @param inv The inverse matrix
      */
-    public static void invert4x4(float m[], float inv[]) {
+    public static void invert4x4(float[] m, float[] inv) {
         // Adapted from The Mesa 3-D graphics library.
         // Copyright (C) 1999-2007  Brian Paul   All Rights Reserved.
         // Published under the MIT license (see the header of this file)
@@ -407,7 +407,7 @@ public class MathUtils {
      * @param m   The input matrix
      * @param inv The inverse matrix
      */
-    public static void invert3x3(float m[], float inv[]) {
+    public static void invert3x3(float[] m, float[] inv) {
         // Adapted from http://stackoverflow.com/a/18504573
         float m0 = m[0];
         float m1 = m[1];
@@ -452,7 +452,7 @@ public class MathUtils {
      * @param result The result matrix
      */
     public static void translate(
-            float m[], float x, float y, float z, float result[]) {
+            float[] m, float x, float y, float z, float[] result) {
         set(m, result);
         result[12] += x;
         result[13] += y;
@@ -469,7 +469,7 @@ public class MathUtils {
      * @param m       The matrix to fill
      */
     public static void infinitePerspective4x4(
-            float fovyDeg, float aspect, float zNear, float m[]) {
+            float fovyDeg, float aspect, float zNear, float[] m) {
         setIdentity4x4(m);
         float fovyRad = (float) Math.toRadians(fovyDeg);
         float t = (float) Math.tan(0.5 * fovyRad);
@@ -492,7 +492,7 @@ public class MathUtils {
      * @param m       The matrix to fill
      */
     public static void perspective4x4(
-            float fovyDeg, float aspect, float zNear, float zFar, float m[]) {
+            float fovyDeg, float aspect, float zNear, float zFar, float[] m) {
         setIdentity4x4(m);
         float fovyRad = (float) Math.toRadians(fovyDeg);
         float t = (float) Math.tan(0.5 * fovyRad);
@@ -512,7 +512,7 @@ public class MathUtils {
      * @param b The second array
      * @return The dot product
      */
-    private static float dot(float a[], float b[]) {
+    private static float dot(float[] a, float[] b) {
         float sum = 0;
         for (int i = 0; i < a.length; i++) {
             sum += a[i] * b[i];
@@ -530,7 +530,7 @@ public class MathUtils {
      * @param result3D  The result point
      */
     public static void transformPoint3D(
-            float matrix4x4[], float point3D[], float result3D[]) {
+            float[] matrix4x4, float[] point3D, float[] result3D) {
         Arrays.fill(result3D, 0.0f);
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {
@@ -553,7 +553,7 @@ public class MathUtils {
      * @param array The array
      * @return The string representation
      */
-    public static String createMatrixString(float array[]) {
+    public static String createMatrixString(float[] array) {
         if (array == null) {
             return "null";
         }
@@ -575,7 +575,7 @@ public class MathUtils {
      * @param cols  The number of columns
      * @return The string representation
      */
-    private static String createMatrixString(float array[], int rows, int cols) {
+    private static String createMatrixString(float[] array, int rows, int cols) {
         StringBuilder sb = new StringBuilder();
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
@@ -599,7 +599,7 @@ public class MathUtils {
      * @param array The array
      * @return The string representation
      */
-    public static String createFormattedMatrixString(float array[]) {
+    public static String createFormattedMatrixString(float[] array) {
         if (array == null) {
             return "null";
         }
@@ -625,7 +625,7 @@ public class MathUtils {
      * @return The string representation
      */
     private static String createFormattedMatrixString(
-            float array[], int rows, int cols, String format) {
+            float[] array, int rows, int cols, String format) {
         StringBuilder sb = new StringBuilder();
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
@@ -664,7 +664,7 @@ public class MathUtils {
      * @param a1     The second array
      * @param result The array that stores the result
      */
-    public static void cross(float a0[], float a1[], float result[]) {
+    public static void cross(float[] a0, float[] a1, float[] result) {
         result[0] = a0[1] * a1[2] - a0[2] * a1[1];
         result[1] = a0[2] * a1[0] - a0[0] * a1[2];
         result[2] = a0[0] * a1[1] - a0[1] * a1[0];
@@ -676,7 +676,7 @@ public class MathUtils {
      * @param a The vector
      * @return The length
      */
-    public static float computeLength(float a[]) {
+    public static float computeLength(float[] a) {
         float sum = 0;
         for (int i = 0; i < a.length; i++) {
             sum += a[i] * a[i];
@@ -694,7 +694,7 @@ public class MathUtils {
      * @param a      The array
      * @param result The array that stores the result
      */
-    public static void normalize(float a[], float result[]) {
+    public static void normalize(float[] a, float[] result) {
         float scaling = 1.0f / computeLength(a);
         scale(a, scaling, result);
     }
@@ -710,7 +710,7 @@ public class MathUtils {
      * @param factor The scaling factor
      * @param result The array that will store the result
      */
-    public static void scale(float a[], float factor, float result[]) {
+    public static void scale(float[] a, float factor, float[] result) {
         for (int i = 0; i < a.length; i++) {
             result[i] = a[i] * factor;
         }

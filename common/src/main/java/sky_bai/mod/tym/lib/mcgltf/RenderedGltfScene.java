@@ -17,13 +17,17 @@ public class RenderedGltfScene {
 
     public final List<Runnable> shaderModRenderCommands = new ArrayList<Runnable>();
 
-    ShaderInstance SHADER = GameRenderer.getRendertypeEntityCutoutNoCullShader();
+    ShaderInstance SHADER = GameRenderer.getRendertypeEntityTranslucentCullShader();
 
     public void setShader(ShaderInstance SHADER) {
         this.SHADER = SHADER;
     }
 
     public void renderForVanilla() {
+        renderForAll(vanillaRenderCommands);
+    }
+
+    private void renderForAll(List<Runnable> commands) {
         int currentProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
 
         if (!skinningCommands.isEmpty()) {
@@ -34,6 +38,7 @@ public class RenderedGltfScene {
             GL40.glBindTransformFeedback(GL40.GL_TRANSFORM_FEEDBACK, 0);
             GL11.glDisable(GL30.GL_RASTERIZER_DISCARD);
         }
+
 
         RenderedGltfModel.CURRENT_SHADER_INSTANCE = SHADER;
         int entitySolidProgram = RenderedGltfModel.CURRENT_SHADER_INSTANCE.getId();
@@ -68,7 +73,7 @@ public class RenderedGltfScene {
         RenderedGltfModel.LIGHT0_DIRECTION = new Vector3f(RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT0_DIRECTION.getFloatBuffer().get(0), RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT0_DIRECTION.getFloatBuffer().get(1), RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT0_DIRECTION.getFloatBuffer().get(2));
         RenderedGltfModel.LIGHT1_DIRECTION = new Vector3f(RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT1_DIRECTION.getFloatBuffer().get(0), RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT1_DIRECTION.getFloatBuffer().get(1), RenderedGltfModel.CURRENT_SHADER_INSTANCE.LIGHT1_DIRECTION.getFloatBuffer().get(2));
 
-        vanillaRenderCommands.forEach(Runnable::run);
+        commands.forEach(Runnable::run);
 
         GL20.glUseProgram(currentProgram);
 

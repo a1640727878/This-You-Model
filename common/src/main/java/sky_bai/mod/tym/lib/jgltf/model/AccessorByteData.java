@@ -197,7 +197,7 @@ public final class AccessorByteData
      * @return The minimum values
      */
     public byte[] computeMin() {
-        byte result[] = new byte[getNumComponentsPerElement()];
+        byte[] result = new byte[getNumComponentsPerElement()];
         Arrays.fill(result, Byte.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -215,7 +215,7 @@ public final class AccessorByteData
      * @return The minimum values
      */
     public byte[] computeMax() {
-        byte result[] = new byte[getNumComponentsPerElement()];
+        byte[] result = new byte[getNumComponentsPerElement()];
         Arrays.fill(result, Byte.MIN_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -234,7 +234,7 @@ public final class AccessorByteData
      * @return The minimum values
      */
     public int[] computeMinInt() {
-        int result[] = new int[getNumComponentsPerElement()];
+        int[] result = new int[getNumComponentsPerElement()];
         Arrays.fill(result, Integer.MAX_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {
@@ -253,7 +253,7 @@ public final class AccessorByteData
      * @return The minimum values
      */
     public int[] computeMaxInt() {
-        int result[] = new int[getNumComponentsPerElement()];
+        int[] result = new int[getNumComponentsPerElement()];
         Arrays.fill(result, Integer.MIN_VALUE);
         for (int e = 0; e < getNumElements(); e++) {
             for (int c = 0; c < getNumComponentsPerElement(); c++) {

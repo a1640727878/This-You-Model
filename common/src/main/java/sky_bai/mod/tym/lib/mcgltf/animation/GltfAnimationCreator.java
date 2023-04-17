@@ -19,21 +19,19 @@ public final class GltfAnimationCreator {
 
             AccessorModel input = sampler.getInput();
             AccessorData inputData = input.getAccessorData();
-            if (!(inputData instanceof AccessorFloatData)) {
+            if (!(inputData instanceof AccessorFloatData inputFloatData)) {
                 MCglTF.logger.warn("Input data is not an AccessorFloatData, but "
                         + inputData.getClass());
                 continue;
             }
-            AccessorFloatData inputFloatData = (AccessorFloatData) inputData;
 
             AccessorModel output = sampler.getOutput();
             AccessorData outputData = output.getAccessorData();
-            if (!(outputData instanceof AccessorFloatData)) {
+            if (!(outputData instanceof AccessorFloatData outputFloatData)) {
                 MCglTF.logger.warn("Output data is not an AccessorFloatData, but "
                         + outputData.getClass());
                 continue;
             }
-            AccessorFloatData outputFloatData = (AccessorFloatData) outputData;
 
             int numKeyElements = inputFloatData.getNumElements();
             float[] keys = new float[numKeyElements];

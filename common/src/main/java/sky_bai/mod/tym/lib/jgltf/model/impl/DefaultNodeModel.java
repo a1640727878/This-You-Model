@@ -71,23 +71,23 @@ public class DefaultNodeModel extends AbstractNamedModelElement
     /**
      * The local transform matrix
      */
-    private float matrix[];
+    private float[] matrix;
     /**
      * The translation
      */
-    private float translation[];
+    private float[] translation;
     /**
      * The rotation
      */
-    private float rotation[];
+    private float[] rotation;
     /**
      * The scale
      */
-    private float scale[];
+    private float[] scale;
     /**
      * The weights
      */
-    private float weights[];
+    private float[] weights;
 
     /**
      * Creates a new instance
@@ -134,30 +134,30 @@ public class DefaultNodeModel extends AbstractNamedModelElement
      * @return The result array
      */
     public static float[] computeLocalTransform(
-            NodeModel nodeModel, float result[]) {
-        float localResult[] = Utils.validate(result, 16);
+            NodeModel nodeModel, float[] result) {
+        float[] localResult = Utils.validate(result, 16);
         if (nodeModel.getMatrix() != null) {
-            float m[] = nodeModel.getMatrix();
+            float[] m = nodeModel.getMatrix();
             System.arraycopy(m, 0, localResult, 0, m.length);
             return localResult;
         }
 
         MathUtils.setIdentity4x4(localResult);
         if (nodeModel.getTranslation() != null) {
-            float t[] = nodeModel.getTranslation();
+            float[] t = nodeModel.getTranslation();
             localResult[12] = t[0];
             localResult[13] = t[1];
             localResult[14] = t[2];
         }
         if (nodeModel.getRotation() != null) {
-            float q[] = nodeModel.getRotation();
-            float m[] = TEMP_MATRIX_4x4_IN_LOCAL.get();
+            float[] q = nodeModel.getRotation();
+            float[] m = TEMP_MATRIX_4x4_IN_LOCAL.get();
             MathUtils.quaternionToMatrix4x4(q, m);
             MathUtils.mul4x4(localResult, m, localResult);
         }
         if (nodeModel.getScale() != null) {
-            float s[] = nodeModel.getScale();
-            float m[] = TEMP_MATRIX_4x4_IN_LOCAL.get();
+            float[] s = nodeModel.getScale();
+            float[] m = TEMP_MATRIX_4x4_IN_LOCAL.get();
             MathUtils.setIdentity4x4(m);
             m[0] = s[0];
             m[5] = s[1];
@@ -179,9 +179,9 @@ public class DefaultNodeModel extends AbstractNamedModelElement
      * @return The result
      */
     private static float[] computeGlobalTransform(
-            NodeModel nodeModel, float result[]) {
-        float localResult[] = Utils.validate(result, 16);
-        float tempLocalTransform[] = TEMP_MATRIX_4x4_IN_GLOBAL.get();
+            NodeModel nodeModel, float[] result) {
+        float[] localResult = Utils.validate(result, 16);
+        float[] tempLocalTransform = TEMP_MATRIX_4x4_IN_GLOBAL.get();
         NodeModel currentNode = nodeModel;
         MathUtils.setIdentity4x4(localResult);
         while (currentNode != null) {
@@ -206,7 +206,7 @@ public class DefaultNodeModel extends AbstractNamedModelElement
      * @throws IllegalArgumentException If the given array does not have
      *                                  the expected length
      */
-    private static float[] check(float array[], int expectedLength) {
+    private static float[] check(float[] array, int expectedLength) {
         if (array == null) {
             return null;
         }
@@ -341,12 +341,12 @@ public class DefaultNodeModel extends AbstractNamedModelElement
     }
 
     @Override
-    public float[] computeLocalTransform(float result[]) {
+    public float[] computeLocalTransform(float[] result) {
         return computeLocalTransform(this, result);
     }
 
     @Override
-    public float[] computeGlobalTransform(float result[]) {
+    public float[] computeGlobalTransform(float[] result) {
         return computeGlobalTransform(this, result);
     }
 
@@ -360,6 +360,11 @@ public class DefaultNodeModel extends AbstractNamedModelElement
     public Supplier<float[]> createLocalTransformSupplier() {
         return Suppliers.createTransformSupplier(this,
                 NodeModel::computeLocalTransform);
+    }
+
+    @Override
+    public void eliminate() {
+        meshModels.clear();
     }
 
     public void record() {

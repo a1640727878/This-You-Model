@@ -227,13 +227,12 @@ public class ImageUtils {
      */
     private static IntBuffer getBuffer(BufferedImage image) {
         DataBuffer dataBuffer = image.getRaster().getDataBuffer();
-        if (!(dataBuffer instanceof DataBufferInt)) {
+        if (!(dataBuffer instanceof DataBufferInt dataBufferInt)) {
             throw new IllegalArgumentException(
                     "Invalid buffer type in image, " +
                             "only TYPE_INT_* is allowed");
         }
-        DataBufferInt dataBufferInt = (DataBufferInt) dataBuffer;
-        int data[] = dataBufferInt.getData();
+        int[] data = dataBufferInt.getData();
         IntBuffer intBuffer = IntBuffer.wrap(data);
         return intBuffer;
     }

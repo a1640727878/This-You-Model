@@ -145,12 +145,9 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
                 || Float.isNaN(vector.z)) {
             return false;
         }
-        if (Float.isInfinite(vector.x)
-                || Float.isInfinite(vector.y)
-                || Float.isInfinite(vector.z)) {
-            return false;
-        }
-        return true;
+        return !Float.isInfinite(vector.x)
+                && !Float.isInfinite(vector.y)
+                && !Float.isInfinite(vector.z);
     }
 
     public static void generateOrthonormalBasis(Vector3f u, Vector3f v, Vector3f w) {
@@ -162,7 +159,7 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
                                                Vector3f w) {
         float fInvLength;
 
-        if ((float) Math.abs(w.x) >= (float) Math.abs(w.y)) {
+        if (Math.abs(w.x) >= Math.abs(w.y)) {
             // w.x or w.z is the largest magnitude component, swap them
             fInvLength = (float) (1.0f / Math.sqrt(w.x * w.x + w.z * w.z));
             u.x = -w.z * fInvLength;
@@ -1019,7 +1016,7 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
      */
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Vector3f)) {
+        if (!(o instanceof Vector3f comp)) {
             return false;
         }
 
@@ -1027,17 +1024,13 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
             return true;
         }
 
-        Vector3f comp = (Vector3f) o;
         if (Float.compare(x, comp.x) != 0) {
             return false;
         }
         if (Float.compare(y, comp.y) != 0) {
             return false;
         }
-        if (Float.compare(z, comp.z) != 0) {
-            return false;
-        }
-        return true;
+        return Float.compare(z, comp.z) == 0;
     }
 
     /**
@@ -1059,10 +1052,7 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
         if (Float.compare(Math.abs(other.y - y), epsilon) > 0) {
             return false;
         }
-        if (Float.compare(Math.abs(other.z - z), epsilon) > 0) {
-            return false;
-        }
-        return true;
+        return Float.compare(Math.abs(other.z - z), epsilon) <= 0;
     }
 
     /**

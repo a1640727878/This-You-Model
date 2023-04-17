@@ -56,7 +56,7 @@ public class BoundingBoxes {
                 new BoundingBoxComputer(gltfModel);
         BoundingBox boundingBox = boundingBoxComputer.compute();
 
-        float result[] = {
+        float[] result = {
                 boundingBox.getMinX(),
                 boundingBox.getMinY(),
                 boundingBox.getMinZ(),

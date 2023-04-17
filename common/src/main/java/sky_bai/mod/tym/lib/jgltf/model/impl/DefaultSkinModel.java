@@ -45,7 +45,7 @@ public final class DefaultSkinModel extends AbstractNamedModelElement
     /**
      * The bind shape matrix
      */
-    private float bindShapeMatrix[];
+    private float[] bindShapeMatrix;
     /**
      * The skeleton node
      */
@@ -91,7 +91,7 @@ public final class DefaultSkinModel extends AbstractNamedModelElement
 
     @Override
     public float[] getBindShapeMatrix(float[] result) {
-        float localResult[] = Utils.validate(result, 16);
+        float[] localResult = Utils.validate(result, 16);
         System.arraycopy(bindShapeMatrix, 0, localResult, 0, 16);
         return localResult;
     }
@@ -132,7 +132,7 @@ public final class DefaultSkinModel extends AbstractNamedModelElement
 
     @Override
     public float[] getInverseBindMatrix(int index, float[] result) {
-        float localResult[] = Utils.validate(result, 16);
+        float[] localResult = Utils.validate(result, 16);
         AccessorFloatData inverseBindMatricesData =
                 AccessorDatas.createFloat(inverseBindMatrices);
         for (int j = 0; j < 16; j++) {

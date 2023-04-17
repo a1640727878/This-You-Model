@@ -5,9 +5,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
@@ -17,10 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 import sky_bai.mod.tym.api.PlayerState;
 import sky_bai.mod.tym.lib.jgltf.model.AnimationModel;
 import sky_bai.mod.tym.lib.jgltf.model.GltfModel;
@@ -40,6 +38,8 @@ public class ModelRendererData {
     private RenderedGltfScene scene;
     private Map<String, List<InterpolatedChannel>> animations;
     private Set<NodeModel> animNode;
+
+    private final NodeModel[] armNodes = new NodeModel[2];
 
     boolean main_is_update = false;
     boolean use_is_update = false;
@@ -65,6 +65,8 @@ public class ModelRendererData {
             if (name == null) continue;
             switch (name) {
                 case "Head", "LeftHandLocator", "RightHandLocator" -> coreNode.put(name, node);
+                case "LeftArm" -> armNodes[0] = node;
+                case "RightArm" -> armNodes[1] = node;
             }
         }
     }
@@ -73,8 +75,8 @@ public class ModelRendererData {
         return true;
     }
 
-    public RenderedGltfScene getScene() {
-        return scene;
+    private void renderForVanilla() {
+        if (scene != null) scene.renderForVanilla();
     }
 
     public Map<String, List<InterpolatedChannel>> getAnimations() {
@@ -82,7 +84,7 @@ public class ModelRendererData {
     }
 
     private List<InterpolatedChannel> getAnimations(String[] names) {
-        if (names == null) return new ArrayList<>();
+        if (names == null || animations == null) return new ArrayList<>();
         List<InterpolatedChannel> list = animations.get(names[0]);
         if (list == null && names.length > 1) list = animations.get(names[0]);
         if (list == null) list = animations.get(PlayerState.IDLE);
@@ -103,8 +105,12 @@ public class ModelRendererData {
         return coreNode;
     }
 
+    public NodeModel[] getArmNodes() {
+        return armNodes;
+    }
+
     public void resetAnimations() {
-        animNode.forEach(NodeModel::reset);
+        if (animNode != null) animNode.forEach(NodeModel::reset);
     }
 
     private float sleepDirectionToRotation(Direction facing) {
@@ -149,13 +155,14 @@ public class ModelRendererData {
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
             matrixStack.mulPose(Vector3f.YP.rotationDegrees(270.0f));
         } /**else if ((swimAmount = entity.getSwimAmount(partialTicks)) > 0f) { // 游泳
-            float g = entity.isInWater() ? 90.0f - entity.getXRot() : 90.0f;
-            float h = Mth.lerp(swimAmount, 0.0f, g);
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(h));
-            if (entity.isVisuallySwimming()) {
-                matrixStack.translate(0.0, -1.0, -0.3f);
-            }
-        }*/ else if (pose == Pose.CROUCHING) matrixStack.translate(0, 0.15, 0);
+         float g = entity.isInWater() ? 90.0f - entity.getXRot() : 90.0f;
+         float h = Mth.lerp(swimAmount, 0.0f, g);
+         matrixStack.mulPose(Vector3f.XP.rotationDegrees(h));
+         if (entity.isVisuallySwimming()) {
+         matrixStack.translate(0.0, -1.0, -0.3f);
+         }
+         }*/
+        else if (pose == Pose.CROUCHING) matrixStack.translate(0, 0.15, 0);
 
     }
 
@@ -217,18 +224,6 @@ public class ModelRendererData {
             }
         }
 
-        int currentVAO = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-        int currentArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
-        int currentElementArrayBuffer = GL11.glGetInteger(GL15.GL_ELEMENT_ARRAY_BUFFER_BINDING);
-
-        boolean currentCullFace = GL11.glGetBoolean(GL11.GL_CULL_FACE);
-
-        boolean currentDepthTest = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
-        boolean currentBlend = GL11.glGetBoolean(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_BLEND);
-        GlStateManager._blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
         matrixStack.pushPose();
         // 设置旋转
         setRotations(entity, matrixStack, rotationYaw, partialTicks, netHeadPitch, netHeadYaw);
@@ -239,6 +234,27 @@ public class ModelRendererData {
 
         // 结束
         matrixStack.popPose();
+
+        renderGL(packedLight);
+
+    }
+
+
+    public void renderGL(int packedLight) {
+        int currentVAO = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
+        int currentArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
+        int currentElementArrayBuffer = GL11.glGetInteger(GL15.GL_ELEMENT_ARRAY_BUFFER_BINDING);
+
+        boolean currentCullFace = GL11.glGetBoolean(GL11.GL_CULL_FACE);
+
+        boolean currentDepthTest = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
+        boolean currentBlend = GL11.glGetBoolean(GL11.GL_BLEND);
+        boolean currentSampleMask = GL11.glGetBoolean(GL32.GL_SAMPLE_MASK);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL32.GL_SAMPLE_MASK);
+
+        GL11.glEnable(GL11.GL_BLEND);
+        GlStateManager._blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         GL30.glVertexAttribI2i(RenderedGltfModel.vaUV2, packedLight & '\uffff', packedLight >> 16 & '\uffff');
 
@@ -254,7 +270,7 @@ public class ModelRendererData {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             int currentTexture0 = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 
-            getScene().renderForVanilla();
+            renderForVanilla();
 
             GL13.glActiveTexture(GL13.GL_TEXTURE2);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, currentTexture2);
@@ -268,6 +284,7 @@ public class ModelRendererData {
 
         if (!currentDepthTest) GL11.glDisable(GL11.GL_DEPTH_TEST);
         if (!currentBlend) GL11.glDisable(GL11.GL_BLEND);
+        if (!currentSampleMask) GL11.glDisable(GL32.GL_SAMPLE_MASK);
 
         if (currentCullFace) GL11.glEnable(GL11.GL_CULL_FACE);
         else GL11.glDisable(GL11.GL_CULL_FACE);
@@ -275,7 +292,6 @@ public class ModelRendererData {
         GL30.glBindVertexArray(currentVAO);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, currentArrayBuffer);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, currentElementArrayBuffer);
-
     }
 
     private Matrix4f getMatrix4f(NodeModel node) {
@@ -305,7 +321,7 @@ public class ModelRendererData {
     }
 
     private void renderHandItem(NodeModel node, ItemStack itemStack, LivingEntity entity, boolean left_hand, PoseStack matrixStack, float rotationYaw, float partialTicks, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
-        ItemInHandRenderer item_renderer = Minecraft.getInstance().getItemInHandRenderer();
+        ItemRenderer item_renderer = Minecraft.getInstance().getItemRenderer();
 
         org.joml.Matrix4f matrix4f = getMatrix4f(node);
         float[] matrix_4x4 = RenderedGltfModel.findGlobalTransform(node);
@@ -316,26 +332,28 @@ public class ModelRendererData {
 
         org.joml.Vector3f translation = new org.joml.Vector3f();
         matrix4f.getTranslation(translation);
-        matrixStack.translate(translation.x, translation.y + 0.2, translation.z + 0.2);
+        matrixStack.translate(translation.x, translation.y, translation.z);
 
         Quaternionf q = new Quaternionf();
         matrix4f.getNormalizedRotation(q);
-        Quaternion qq = new Quaternion(q.x, q.z, q.y, q.w);
-        matrixStack.mulPose(qq);
+        Quaternion qq = new Quaternion(q.x, q.y, q.z, q.w);
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-
+        matrixStack.mulPose(qq);
 
         /**org.joml.Vector3f scale = new org.joml.Vector3f();
          matrix4f.getScale(scale);
          matrixStack.scale(scale.x, scale.x, scale.x);*/
 
-        item_renderer.renderItem(entity, itemStack
-                , getTransformType(left_hand), left_hand, matrixStack, buffer, packedLight);
+        ItemTransforms.TransformType transformType = getTransformType(left_hand);
+        item_renderer.renderStatic(entity, itemStack
+                , transformType, left_hand, matrixStack, buffer, entity.level, packedLight, OverlayTexture.NO_OVERLAY, entity.getId() + transformType.ordinal());
 
         matrixStack.popPose();
     }
 
     public void renderItem(LivingEntity entity, float rotationYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float netHeadPitch, float netHeadYaw) {
+        if (getCoreNode() == null) return;
         for (Map.Entry<String, NodeModel> entry : getCoreNode().entrySet()) {
             NodeModel node = entry.getValue();
             String name = entry.getKey();

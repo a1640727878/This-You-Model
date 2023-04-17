@@ -188,9 +188,7 @@ public class MCglTF {
 
     public void processRenderedGltfModels(Set<ModelData> lookup) {
         lookup.forEach(data -> {
-            initializeModelRenderer(data.getModel(), data.getModelRenderer());
-            initializeModelRenderer(data.getArmModelLeft(), data.getArmModelLeftRenderer());
-            initializeModelRenderer(data.getArmModelRight(), data.getArmModelRightRenderer());
+            data.getInitializeModelRenderer().forEach(this::initializeModelRenderer);
         });
         GL15.glBindBuffer(GL30.GL_TRANSFORM_FEEDBACK_BUFFER, 0);
         GL15.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, 0);

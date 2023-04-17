@@ -66,10 +66,7 @@ public class GltfAssets {
         if (binaryData != null && binaryData.capacity() > 0) {
             return false;
         }
-        if (containsDataUriReferences(gltfAsset)) {
-            return false;
-        }
-        return true;
+        return !containsDataUriReferences(gltfAsset);
     }
 
     /**
@@ -86,10 +83,7 @@ public class GltfAssets {
         if (binaryData != null && binaryData.capacity() > 0) {
             return false;
         }
-        if (containsFileUriReferences(gltfAsset)) {
-            return false;
-        }
-        return true;
+        return !containsFileUriReferences(gltfAsset);
     }
 
     /**
@@ -107,10 +101,7 @@ public class GltfAssets {
         if (containsFileUriReferences(gltfAsset)) {
             return false;
         }
-        if (containsDataUriReferences(gltfAsset)) {
-            return false;
-        }
-        return true;
+        return !containsDataUriReferences(gltfAsset);
     }
 
     /**

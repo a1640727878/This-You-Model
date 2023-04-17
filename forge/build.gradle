@@ -63,7 +63,7 @@ shadowJar {
 
     configurations = [project.configurations.shadowCommon]
     classifier "all"
-    minimize()
+    // minimize()
 }
 
 remapJar {

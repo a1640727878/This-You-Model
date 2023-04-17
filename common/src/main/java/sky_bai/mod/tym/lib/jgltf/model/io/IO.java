@@ -195,8 +195,7 @@ public class IO {
     private static boolean exists(URI uri) throws IOException {
         URL url = uri.toURL();
         URLConnection connection = url.openConnection();
-        if (connection instanceof HttpURLConnection) {
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+        if (connection instanceof HttpURLConnection httpConnection) {
             httpConnection.setRequestMethod("HEAD");
             int responseCode = httpConnection.getResponseCode();
             return responseCode == HttpURLConnection.HTTP_OK;
@@ -231,7 +230,7 @@ public class IO {
      */
     public static InputStream createInputStream(URI uri) throws IOException {
         if ("data".equalsIgnoreCase(uri.getScheme())) {
-            byte data[] = readDataUri(uri.toString());
+            byte[] data = readDataUri(uri.toString());
             return new ByteArrayInputStream(data);
         }
         try {
@@ -251,7 +250,7 @@ public class IO {
      */
     public static InputStream createInputStream(Path path) throws IOException {
         if ("data".equalsIgnoreCase(path.toUri().getScheme())) {
-            byte data[] = readDataUri(path.toUri().toString());
+            byte[] data = readDataUri(path.toUri().toString());
             return new ByteArrayInputStream(data);
         }
         try {
@@ -272,7 +271,7 @@ public class IO {
     public static byte[] read(URI uri)
             throws IOException {
         try (InputStream inputStream = createInputStream(uri)) {
-            byte data[] = readStream(inputStream);
+            byte[] data = readStream(inputStream);
             return data;
         }
     }
@@ -297,7 +296,7 @@ public class IO {
                             + "data URI string: " + uriString);
         }
         int contentStartIndex = encodingIndex + encoding.length();
-        byte data[] = Base64.getDecoder().decode(
+        byte[] data = Base64.getDecoder().decode(
                 uriString.substring(contentStartIndex));
         return data;
     }
@@ -313,7 +312,7 @@ public class IO {
      */
     public static byte[] readStream(InputStream inputStream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte buffer[] = new byte[16384];
+        byte[] buffer = new byte[16384];
         while (true) {
             int read = inputStream.read(buffer);
             if (read == -1) {
@@ -344,7 +343,7 @@ public class IO {
      *                                  the sum of the given offset and the number of bytes to read is larger
      *                                  than the length of the given array
      */
-    static void read(InputStream inputStream, byte data[], int offset,
+    static void read(InputStream inputStream, byte[] data, int offset,
                      int numBytesToRead) throws IOException {
         if (offset < 0) {
             throw new IllegalArgumentException(
@@ -382,7 +381,7 @@ public class IO {
      *                     stream was encountered before the requested number of bytes have
      *                     been read
      */
-    public static void read(InputStream inputStream, byte data[])
+    public static void read(InputStream inputStream, byte[] data)
             throws IOException {
         read(inputStream, data, 0, data.length);
     }

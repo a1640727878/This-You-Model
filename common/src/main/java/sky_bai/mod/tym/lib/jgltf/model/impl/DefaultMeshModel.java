@@ -46,7 +46,7 @@ public class DefaultMeshModel extends AbstractNamedModelElement
     /**
      * The morph target weights
      */
-    private float weights[];
+    private float[] weights;
 
     /**
      * Creates a new instance

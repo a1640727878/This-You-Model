@@ -68,7 +68,7 @@ class AccessorSparseUtils {
             AccessorByteData accessorByteData =
                     (AccessorByteData) accessorData;
             int numElements = accessorByteData.getNumElements();
-            int indices[] = new int[numElements];
+            int[] indices = new int[numElements];
             for (int i = 0; i < numElements; i++) {
                 indices[i] = accessorByteData.getInt(i, 0);
             }
@@ -78,7 +78,7 @@ class AccessorSparseUtils {
             AccessorShortData accessorShortData =
                     (AccessorShortData) accessorData;
             int numElements = accessorShortData.getNumElements();
-            int indices[] = new int[numElements];
+            int[] indices = new int[numElements];
             for (int i = 0; i < numElements; i++) {
                 indices[i] = accessorShortData.getInt(i, 0);
             }
@@ -88,7 +88,7 @@ class AccessorSparseUtils {
             AccessorIntData accessorIntData =
                     (AccessorIntData) accessorData;
             int numElements = accessorIntData.getNumElements();
-            int indices[] = new int[numElements];
+            int[] indices = new int[numElements];
             for (int i = 0; i < numElements; i++) {
                 indices[i] = accessorIntData.get(i, 0);
             }
@@ -217,7 +217,7 @@ class AccessorSparseUtils {
         }
 
         // Apply the substitution based on the sparse indices and values
-        int indices[] = extractIndices(sparseIndicesAccessorData);
+        int[] indices = extractIndices(sparseIndicesAccessorData);
         for (int i = 0; i < indices.length; i++) {
             int targetElementIndex = indices[i];
             for (int c = 0; c < numComponentsPerElement; c++) {
@@ -257,7 +257,7 @@ class AccessorSparseUtils {
         }
 
         // Apply the substitution based on the sparse indices and values
-        int indices[] = extractIndices(sparseIndicesAccessorData);
+        int[] indices = extractIndices(sparseIndicesAccessorData);
         for (int i = 0; i < indices.length; i++) {
             int targetElementIndex = indices[i];
             for (int c = 0; c < numComponentsPerElement; c++) {
@@ -297,7 +297,7 @@ class AccessorSparseUtils {
         }
 
         // Apply the substitution based on the sparse indices and values
-        int indices[] = extractIndices(sparseIndicesAccessorData);
+        int[] indices = extractIndices(sparseIndicesAccessorData);
         for (int i = 0; i < indices.length; i++) {
             int targetElementIndex = indices[i];
             for (int c = 0; c < numComponentsPerElement; c++) {
@@ -337,7 +337,7 @@ class AccessorSparseUtils {
         }
 
         // Apply the substitution based on the sparse indices and values
-        int indices[] = extractIndices(sparseIndicesAccessorData);
+        int[] indices = extractIndices(sparseIndicesAccessorData);
         for (int i = 0; i < indices.length; i++) {
             int targetElementIndex = indices[i];
             for (int c = 0; c < numComponentsPerElement; c++) {

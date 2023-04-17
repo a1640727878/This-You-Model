@@ -87,7 +87,7 @@ public final class GltfAssetWriterV2 {
             throws IOException {
         // Write the JSON representation of the glTF
         GlTF gltf = gltfAsset.getGltf();
-        byte jsonData[];
+        byte[] jsonData;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             GltfWriter gltfWriter = new GltfWriter();
             gltfWriter.setIndenting(false);
@@ -150,7 +150,7 @@ public final class GltfAssetWriterV2 {
         /**
          * The stream that will collect the data
          */
-        private ByteArrayOutputStream baos;
+        private final ByteArrayOutputStream baos;
 
         /**
          * Default constructor

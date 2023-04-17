@@ -22,7 +22,7 @@ public class TYM_Command {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("tym");
 
-        LiteralArgumentBuilder<CommandSourceStack> reload = Commands.literal("reload").executes(context -> {
+        LiteralArgumentBuilder<CommandSourceStack> reload = Commands.literal("reload").requires(stack -> stack.hasPermission(2)).executes(context -> {
             FileModelManager.getManager().reload();
             sendPayerReloadModel(context.getSource().getServer());
             dispatcher.register(command);

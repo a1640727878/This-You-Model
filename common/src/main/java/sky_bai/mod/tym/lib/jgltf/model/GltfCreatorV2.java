@@ -350,7 +350,7 @@ public class GltfCreatorV2 {
      * @param array The array
      * @return The list
      */
-    private static List<Float> toList(float array[]) {
+    private static List<Float> toList(float[] array) {
         if (array == null) {
             return null;
         }
@@ -567,8 +567,7 @@ public class GltfCreatorV2 {
      * @return The {@link Material}
      */
     private Material createMaterial(MaterialModel materialModel) {
-        if (materialModel instanceof MaterialModelV2) {
-            MaterialModelV2 materialModelV2 = (MaterialModelV2) materialModel;
+        if (materialModel instanceof MaterialModelV2 materialModelV2) {
             return createMaterialV2(materialModelV2);
         }
         // TODO It should be possible to use a glTF 1.0 material model here
@@ -944,10 +943,7 @@ public class GltfCreatorV2 {
             if (!Objects.equals(wrapS, other.wrapS)) {
                 return false;
             }
-            if (!Objects.equals(wrapT, other.wrapT)) {
-                return false;
-            }
-            return true;
+            return Objects.equals(wrapT, other.wrapT);
         }
     }
 }

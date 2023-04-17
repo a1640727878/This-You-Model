@@ -41,7 +41,7 @@ public interface TechniqueStatesModel {
      *
      * @return All possible states
      */
-    public static List<Integer> getAllStates() {
+    static List<Integer> getAllStates() {
         List<Integer> allStates = Arrays.asList(
                 GltfConstants.GL_BLEND,
                 GltfConstants.GL_CULL_FACE,

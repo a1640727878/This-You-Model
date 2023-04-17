@@ -171,7 +171,7 @@ public class UriResolvers {
                         logger.warning("The input stream was null");
                         return null;
                     }
-                    byte data[] = IO.readStream(inputStream);
+                    byte[] data = IO.readStream(inputStream);
                     return Buffers.create(data);
                 } catch (IOException e) {
                     logger.warning("Could not read from input stream: "

@@ -55,21 +55,15 @@ public class AccessorDataUtils {
     public static int[] readInts(AccessorData accessorData) {
         int numElements = accessorData.getNumElements();
         int numComponents = accessorData.getNumComponentsPerElement();
-        if (accessorData instanceof AccessorByteData) {
-            AccessorByteData accessorByteData =
-                    (AccessorByteData) accessorData;
+        if (accessorData instanceof AccessorByteData accessorByteData) {
             return readIntsFromBytes(
                     accessorByteData, numElements, numComponents);
         }
-        if (accessorData instanceof AccessorShortData) {
-            AccessorShortData accessorShortData =
-                    (AccessorShortData) accessorData;
+        if (accessorData instanceof AccessorShortData accessorShortData) {
             return readIntsFromShorts(
                     accessorShortData, numElements, numComponents);
         }
-        if (accessorData instanceof AccessorIntData) {
-            AccessorIntData accessorIntData =
-                    (AccessorIntData) accessorData;
+        if (accessorData instanceof AccessorIntData accessorIntData) {
             return readIntsFromInts(
                     accessorIntData, numElements, numComponents);
         }
@@ -88,7 +82,7 @@ public class AccessorDataUtils {
     private static int[] readIntsFromBytes(
             AccessorByteData accessorByteData, int numElements, int numComponents) {
         int n = numElements * numComponents;
-        int result[] = new int[n];
+        int[] result = new int[n];
         int index = 0;
         for (int e = 0; e < numElements; e++) {
             for (int c = 0; c < numComponents; c++) {
@@ -110,7 +104,7 @@ public class AccessorDataUtils {
     private static int[] readIntsFromShorts(
             AccessorShortData accessorShortData, int numElements, int numComponents) {
         int n = numElements * numComponents;
-        int result[] = new int[n];
+        int[] result = new int[n];
         int index = 0;
         for (int e = 0; e < numElements; e++) {
             for (int c = 0; c < numComponents; c++) {
@@ -132,7 +126,7 @@ public class AccessorDataUtils {
     private static int[] readIntsFromInts(
             AccessorIntData accessorIntData, int numElements, int numComponents) {
         int n = numElements * numComponents;
-        int result[] = new int[n];
+        int[] result = new int[n];
         int index = 0;
         for (int e = 0; e < numElements; e++) {
             for (int c = 0; c < numComponents; c++) {
@@ -160,7 +154,7 @@ public class AccessorDataUtils {
     public static float[] readFloats(
             AccessorFloatData accessorData, int numElements, int numComponents) {
         int n = numElements * numComponents;
-        float result[] = new float[n];
+        float[] result = new float[n];
         int index = 0;
         for (int e = 0; e < numElements; e++) {
             for (int c = 0; c < numComponents; c++) {
@@ -186,7 +180,7 @@ public class AccessorDataUtils {
      */
     public static void writeFloats(
             AccessorFloatData accessorData, int numElements, int numComponents,
-            float data[]) {
+            float[] data) {
         int index = 0;
         for (int e = 0; e < numElements; e++) {
             for (int c = 0; c < numComponents; c++) {

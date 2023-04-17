@@ -130,7 +130,7 @@ public class Optionals {
      * @param array The array
      * @return The result
      */
-    public static float[] clone(float array[]) {
+    public static float[] clone(float[] array) {
         if (array == null) {
             return null;
         }
@@ -144,7 +144,7 @@ public class Optionals {
      * @param array The array
      * @return The result
      */
-    public static int[] clone(int array[]) {
+    public static int[] clone(int[] array) {
         if (array == null) {
             return null;
         }
@@ -158,7 +158,7 @@ public class Optionals {
      * @param array The array
      * @return The result
      */
-    public static boolean[] clone(boolean array[]) {
+    public static boolean[] clone(boolean[] array) {
         if (array == null) {
             return null;
         }

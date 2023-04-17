@@ -57,7 +57,7 @@ public class Suppliers {
      */
     public static <T> Supplier<float[]> createTransformSupplier(
             T object, BiConsumer<T, float[]> computer) {
-        float transform[] = new float[16];
+        float[] transform = new float[16];
         if (object == null) {
             return () ->
             {
